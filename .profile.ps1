@@ -1,7 +1,7 @@
 #Author: vhanla
 
 # Set code page to Unicode UTF-8
-chcp 65001
+chcp 65001 > $null
 
 #Force coloring of git and npm commands
 $env:TERM = 'cygwin'
@@ -110,6 +110,9 @@ function Prompt {
 	$prompt_git_background = "DarkMagenta"
 	$prompt_git_text = "Black"
 
+		$currentDrive = (Get-Location).Drive
+		$currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
+
 	# Grab Git Branch
 	$git_string = "";
 	git branch | foreach {
@@ -144,20 +147,25 @@ function Prompt {
 	$relativePath = relativePathToHome
 
 	# Write-Host -NoNewLine (" PS$psVersion " -f (Get-Date)) -foregroundColor $prompt_time_text -backgroundColor $prompt_time_background
-	Write-Host -NoNewLine " $([char]0xFAB2)" -foregroundColor "Blue" -backgroundColor $prompt_time_background
-	Write-Host -NoNewLine ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor $prompt_time_text -backgroundColor $prompt_time_background
-	Write-Host -NoNewLine "$([char]57520)" -foregroundColor $prompt_time_background -backgroundColor $prompt_background
+	Write-Host -NoNewLine " $([char]0xFAB2)" -foregroundColor "White" -backgroundColor "Blue"
+	# Write-Host -NoNewLine "⎪" -backgroundColor "Blue" -foregroundColor "Black"
+	Write-Host -NoNewLine (" {0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "White" -backgroundColor "Blue"
+	Write-Host -NoNewLine "⎪" -backgroundColor "Blue" -foregroundColor "Black"
+	Write-Host -NoNewLine " $currentDriveLabel " -foregroundColor "White" -backgroundColor "Blue"
+	Write-Host -NoNewLine "$([char]57528)" -foregroundColor "Blue" -backgroundColor $prompt_time_background
+	Write-Host -NoNewLine " $path " -foregroundColor "Black" -backgroundColor "Gray"
+	# Write-Host -NoNewLine ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor $prompt_time_text -backgroundColor $prompt_time_background
 	# Write-Host " $path " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
-	Write-Host " $relativePath " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
+	# Write-Host " $relativePath " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
 	if (($git_status.length + $git_remoteDiffers) -ne 0){
-		Write-Host  "$([char]57520)" -foregroundColor $prompt_background -NoNewLine -backgroundColor $prompt_git_background
+		Write-Host  "$([char]57520)" -foregroundColor "Gray" -NoNewLine -backgroundColor $prompt_git_background
 		Write-Host  " $([char]0xE725) " -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background -NoNewLine
 		Write-Host "$git_string " -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
 		# Write-Host "$git_differsFromRemote " -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
 		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor $prompt_git_background
 	}
 	else{
-		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor $prompt_background
+		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Gray"
 	}
 	# Write-Host -NoNewLine "[" -foregroundColor Yellow
 	# Write-Host -NoNewLine "]$" -foregroundColor Yellow
