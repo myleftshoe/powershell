@@ -128,7 +128,8 @@ function Prompt {
 		$prompt_text = "White"
 		$prompt_background = "Blue"
 	}
-
+    $git_remoteDiffers = $(git rev-list HEAD...origin/master --count)
+	Write-Host $git_remoteDiffers
 	if ($(git rev-list HEAD...origin/master --count) -ne 0) {
 		$prompt_git_background = "Yellow"
 	}
@@ -149,7 +150,7 @@ function Prompt {
 	Write-Host -NoNewLine "$([char]57520)" -foregroundColor $prompt_time_background -backgroundColor $prompt_background
 	# Write-Host " $path " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
 	Write-Host " $relativePath " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
-	if ($git_status){
+	if ($git_string -and $($git_remoteDiffers -ne $false)){
 		Write-Host  "$([char]57520)" -foregroundColor $prompt_background -NoNewLine -backgroundColor $prompt_git_background
 		Write-Host  " $([char]0xE725) " -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background -NoNewLine
 		Write-Host "$git_string " -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
