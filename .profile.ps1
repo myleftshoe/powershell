@@ -107,7 +107,7 @@ function Prompt {
 	$prompt_time_background = "Gray"
 	$prompt_text = "White"
 	$prompt_background = "Blue"
-	$prompt_git_background = "Yellow"
+	$prompt_git_background = "DarkGreen"
 	$prompt_git_text = "Black"
 
 	# Grab Git Branch
@@ -124,18 +124,17 @@ function Prompt {
 		$git_status = $_ #just replace other wise it will be empty
 	}
 
-	$git_differsFromRemote="";
-	if ($(git rev-list HEAD...origin/master --count) -ne 0) {
-		$git_differsFromRemote = "X"
-	}
-
 	if (!$git_string)	{
 		$prompt_text = "White"
 		$prompt_background = "Blue"
 	}
 
-	if (!$git_status){
-		$prompt_git_background = "DarkGreen"
+	if ($(git rev-list HEAD...origin/master --count) -ne 0) {
+		$prompt_git_background = "Cyan"
+	}
+
+	if ($git_status){
+		$prompt_git_background = "Yellow"
 	}
 
 	$curtime = Get-Date
@@ -154,7 +153,7 @@ function Prompt {
 		Write-Host  "$([char]57520)" -foregroundColor $prompt_background -NoNewLine -backgroundColor $prompt_git_background
 		Write-Host  " $([char]0xE725) " -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background -NoNewLine
 		Write-Host "$git_string " -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
-		Write-Host "$git_differsFromRemote" -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
+		# Write-Host "$git_differsFromRemote " -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
 		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor $prompt_git_background
 	}
 	else{
