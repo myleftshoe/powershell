@@ -134,7 +134,7 @@ function Prompt {
 	}
 
 	if ($git_status){
-		$prompt_git_background = "Red"
+		$prompt_git_background = "DarkMagenta"
 	}
 
 	$curtime = Get-Date
