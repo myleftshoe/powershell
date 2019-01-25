@@ -130,7 +130,7 @@ function Prompt {
 	}
 
 	if ($(git rev-list HEAD...origin/master --count) -ne 0) {
-		$prompt_git_background = "DarkOrange"
+		$prompt_git_background = "DarkYellow"
 	}
 
 	if ($git_status){
