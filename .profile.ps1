@@ -1,4 +1,8 @@
 #Author: vhanla
+
+# Set code page to Unicode UTF-8
+chcp 65001
+
 #Force coloring of git and npm commands
 $env:TERM = 'cygwin'
 $env:TERM = 'FRSX'
@@ -30,7 +34,6 @@ Import-Module PSColor
 # Write-Host "¡Let's program!" `n
 
 # Create home alias to folder in which shell was started
-
 function goHome {Set-Location $_home}
 Set-Alias ~~ goHome
 Set-Alias * goHome
