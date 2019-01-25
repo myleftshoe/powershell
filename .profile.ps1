@@ -157,7 +157,7 @@ function Prompt {
 		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor $prompt_git_background
 		Write-Host $git_remoteDiffers
 		Write-Host $git_status.length
-		Write-Host ($git_status -or $git_remoteDiffers)
+		Write-Host ($git_status.length -or $git_remoteDiffers)
 	}
 	else{
 		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor $prompt_background
