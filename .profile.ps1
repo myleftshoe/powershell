@@ -131,7 +131,7 @@ function Prompt {
     $git_remoteDiffers = $(git rev-list HEAD...origin/master --count)
 	Write-Host $git_remoteDiffers
 	Write-Host $git_status
-	if ($(git rev-list HEAD...origin/master --count) -ne 0) {
+	if ($git_remoteDiffers) {
 		$prompt_git_background = "Yellow"
 	}
 
