@@ -130,11 +130,11 @@ function Prompt {
 	}
 
 	if ($(git rev-list HEAD...origin/master --count) -ne 0) {
-		$prompt_git_background = "Cyan"
+		$prompt_git_background = "DarkOrange"
 	}
 
 	if ($git_status){
-		$prompt_git_background = "Yellow"
+		$prompt_git_background = "Red"
 	}
 
 	$curtime = Get-Date
