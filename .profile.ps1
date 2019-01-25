@@ -129,7 +129,7 @@ function Prompt {
 		$prompt_background = "Blue"
 	}
 
-	if ($git_status){
+	if (!$git_status){
 		$prompt_git_background = "DarkGreen"
 	}
 
