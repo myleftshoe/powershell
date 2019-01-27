@@ -152,13 +152,15 @@ function Prompt {
 	Write-Host -NoNewLine (" {0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "White" -backgroundColor "Blue"
 	Write-Host -NoNewLine "⎪" -backgroundColor "Blue" -foregroundColor "Black"
 	Write-Host -NoNewLine " $currentDriveLabel " -foregroundColor "White" -backgroundColor "Blue"
-	Write-Host -NoNewLine "$([char]57528)" -foregroundColor "Blue" -backgroundColor $prompt_time_background
+	Write-Host -NoNewLine "$([char]57528)" -foregroundColor "Blue" -backgroundColor "Gray"
 	Write-Host -NoNewLine " $path " -foregroundColor "Black" -backgroundColor "Gray"
+	Write-Host -NoNewLine "⎪" -foregroundColor "Black" -backgroundColor "Gray"
+	Write-Host -NoNewLine " $relativePath " -foregroundColor "Black" -backgroundColor "Gray"
 	# Write-Host -NoNewLine ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor $prompt_time_text -backgroundColor $prompt_time_background
 	# Write-Host " $path " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
 	# Write-Host " $relativePath " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
 	if (($git_status.length + $git_remoteDiffers) -ne 0){
-		Write-Host  "$([char]57520)" -foregroundColor "Gray" -NoNewLine -backgroundColor $prompt_git_background
+		Write-Host  "$([char]57528)" -foregroundColor "Gray" -NoNewLine -backgroundColor $prompt_git_background
 		Write-Host  " $([char]0xE725) " -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background -NoNewLine
 		Write-Host "$git_string " -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
 		# Write-Host "$git_differsFromRemote " -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
