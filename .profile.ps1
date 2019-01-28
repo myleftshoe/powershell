@@ -98,6 +98,21 @@ function relativePathToHome{
 		return $trimmedRelativePath
 }
 
+# function local:write-Time {
+# 	$message = "This text is right aligned"
+# 	$message=(" {0:HH}:{0:mm}:{0:ss} " -f (Get-Date))
+# 	$currentColor=$Host.UI.RawUI.BackgroundColor
+# 	$startposx = $Host.UI.RawUI.windowsize.width - $message.length - 2
+# 	$host.UI.RawUI.ForegroundColor = "Blue"
+# 	$Host.UI.Write("{0,$startposx}" -f "")
+# 	$host.UI.RawUI.ForegroundColor = "White"
+# 	$host.UI.RawUI.BackgroundColor = "Blue"
+# 	$Host.UI.Write($message)
+# 	$host.UI.RawUI.ForegroundColor = "Blue"
+# 	$host.UI.RawUI.BackgroundColor = $currentColor
+# 	$Host.UI.WriteLine("")
+# }
+
 function Prompt {
 	# Prompt Colors
 	# Black DarkBlue DarkGreen DarkCyan DarkRed DarkMagenta DarkYellow
@@ -110,35 +125,33 @@ function Prompt {
 	$prompt_git_background = "DarkMagenta"
 	$prompt_git_text = "Black"
 
-		$currentDrive = (Get-Location).Drive
-		$currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
+	$currentDrive = (Get-Location).Drive
+	$currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
 
-	# Grab Git Branch
-	$git_string = "";
+	$is_git = git rev-parse --is-inside-work-tree
+
+	$git_branch = "";
 	git branch | foreach {
 		if ($_ -match "^\* (.*)"){
-			$git_string += $matches[1]
+			$git_branch += $matches[1]
 		}
 	}
 
 	# Grab Git Status
-	$git_status = "";
+	$git_status = ""
+	$git_hasStaged = ""
+	$git_hasUnstaged = ""
 	git status --porcelain | foreach {
 		$git_status = $_ #just replace other wise it will be empty
+		if ($_.substring(0,1) -ne " ") {
+			$git_hasStaged=$TRUE
+		}
+		if ($_.substring(1,1) -ne " ") {
+			$git_hasUnstaged=$TRUE
+		}
 	}
 
-	if (!$git_string)	{
-		$prompt_text = "White"
-		$prompt_background = "Blue"
-	}
     $git_remoteDiffers = $(git rev-list HEAD...origin/master --count)
-	if ($git_remoteDiffers) {
-		$prompt_git_background = "Green"
-	}
-
-	if ($git_status){
-		$prompt_git_background = "Yellow"
-	}
 
 	$curtime = Get-Date
 	# $drive = (PWD).Drive.Name
@@ -147,26 +160,44 @@ function Prompt {
 	$relativePath = relativePathToHome
 
 	# Write-Host -NoNewLine (" PS$psVersion " -f (Get-Date)) -foregroundColor $prompt_time_text -backgroundColor $prompt_time_background
-	Write-Host -NoNewLine " $([char]0xFAB2)" -foregroundColor "White" -backgroundColor "Blue"
 	# Write-Host -NoNewLine "⎪" -backgroundColor "Blue" -foregroundColor "Black"
-	Write-Host -NoNewLine (" {0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "White" -backgroundColor "Blue"
+	# write-Host "`r`n"
+	$host.UI.RawUI.BufferSize.width=1000
+	# write-Time
+	Write-Host ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "Gray"
+	# Write-Host "($PWD)" -foregroundColor "DarkGray"
+	$host.UI.RawUI.ForegroundColor = "White"
+	$host.UI.RawUI.BackgroundColor = "Blue"
+	$host.UI.Write(" $([char]0xFAB2)")
+	$host.UI.RawUI.BackgroundColor = "Black"
+	# Write-Host -NoNewLine "`r`n $([char]0xFAB2)" -foregroundColor "White" -backgroundColor "Blue"
 	Write-Host -NoNewLine "⎪" -backgroundColor "Blue" -foregroundColor "Black"
 	Write-Host -NoNewLine " $currentDriveLabel " -foregroundColor "White" -backgroundColor "Blue"
 	Write-Host -NoNewLine "$([char]57528)" -foregroundColor "Blue" -backgroundColor "Gray"
+	# Write-Host -NoNewLine " $relativePath " -foregroundColor "Black" -backgroundColor "Gray"
+	# Write-Host -NoNewLine (" {0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "White" -backgroundColor "Blue"
 	Write-Host -NoNewLine " $path " -foregroundColor "Black" -backgroundColor "Gray"
-	Write-Host -NoNewLine "⎪" -foregroundColor "Black" -backgroundColor "Gray"
-	Write-Host -NoNewLine " $relativePath " -foregroundColor "Black" -backgroundColor "Gray"
-	# Write-Host -NoNewLine ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor $prompt_time_text -backgroundColor $prompt_time_background
 	# Write-Host " $path " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
 	# Write-Host " $relativePath " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
-	if (($git_status.length + $git_remoteDiffers) -ne 0){
-		Write-Host  "$([char]57528)" -foregroundColor "Gray" -NoNewLine -backgroundColor $prompt_git_background
-		Write-Host  " $([char]0xE725) " -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background -NoNewLine
-		Write-Host "$git_string " -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
-		# Write-Host "$git_differsFromRemote " -NoNewLine -foregroundColor $prompt_git_text -backgroundColor $prompt_git_background
-		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor $prompt_git_background
+	if ($git_hasUnstaged) {
+		Write-Host  "$([char]57528)" -NoNewLine -foregroundColor "Gray" -backgroundColor "Red"
+		Write-Host  " $([char]0xE725) "  -NoNewLine -foregroundColor "Black" -backgroundColor "Red"
+		Write-Host "$git_branch " -NoNewLine -foregroundColor "Black" -backgroundColor "Red"
+		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Red"
 	}
-	else{
+	elseif ($git_hasStaged){
+		Write-Host  "$([char]57528)" -NoNewLine -foregroundColor "Gray" -backgroundColor "Green"
+		Write-Host  " $([char]0xE725) " -NoNewLine -foregroundColor "Black" -backgroundColor "Green"
+		Write-Host "$git_branch " -NoNewLine -foregroundColor "Black" -backgroundColor "Green"
+		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Green"
+	}
+	elseif ($git_remoteDiffers -gt 0){
+		Write-Host  "$([char]57528)" -NoNewLine -foregroundColor "Gray" -backgroundColor "Yellow"
+		Write-Host  " $([char]0xE725) " -NoNewLine -foregroundColor "Black" -backgroundColor "Yellow"
+		Write-Host "$git_branch " -NoNewLine -foregroundColor "Black" -backgroundColor "Yellow"
+		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Yellow"
+	}
+	else {
 		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Gray"
 	}
 	# Write-Host -NoNewLine "[" -foregroundColor Yellow
