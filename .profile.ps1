@@ -105,20 +105,20 @@ function Prompt {
     $path = Split-Path (Get-Location) -Leaf
 
     $host.UI.RawUI.BufferSize.width = 1000
-    Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "Gray"
+    Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "Blue"
     if ($previousCommandDuration) {
         Write-Host -NoNewLine "($previousCommandDuration ms)"  -foregroundColor "Gray"
         # Write-Host "('$previousCommand' took $previousCommandDuration ms)"  -foregroundColor "Gray"
     }
     Write-Host
     $host.UI.RawUI.ForegroundColor = "White"
-    $host.UI.RawUI.BackgroundColor = "Blue"
+    $host.UI.RawUI.BackgroundColor = "DarkBlue"
     $host.UI.Write(" $([char]0xFAB2)")
     $host.UI.RawUI.BackgroundColor = "Black"
-    Write-Host -NoNewLine "⎪" -backgroundColor "Blue" -foregroundColor "Black"
-    Write-Host -NoNewLine " $currentDriveLabel " -foregroundColor "White" -backgroundColor "Blue"
-    Write-Host -NoNewLine "$([char]57528)" -foregroundColor "Blue" -backgroundColor "Gray"
-    Write-Host -NoNewLine " $path " -foregroundColor "White" -backgroundColor "Gray"
+    Write-Host -NoNewLine "⎪" -backgroundColor "DarkBlue" -foregroundColor "Black"
+    Write-Host -NoNewLine " $currentDriveLabel " -foregroundColor "White" -backgroundColor "DarkBlue"
+    Write-Host -NoNewLine "$([char]57528)" -foregroundColor "DarkBlue" -backgroundColor "Blue"
+    Write-Host -NoNewLine " $path " -foregroundColor "White" -backgroundColor "Blue"
     if ($is_git) {
         Write-Host  "$([char]57528)" -NoNewLine -foregroundColor "Gray" -backgroundColor "DarkGray"
         Write-Host  " $([char]0xE725) "  -NoNewLine -foregroundColor "Black" -backgroundColor "DarkGray"
@@ -129,7 +129,7 @@ function Prompt {
         Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "DarkGray"
     }
     else {
-        Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Gray"
+        Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Blue"
     }
 
     $windowTitle = "$((Get-Location).Path)"
