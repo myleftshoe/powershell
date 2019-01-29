@@ -68,6 +68,9 @@ function Prompt {
     # Black DarkBlue DarkGreen DarkCyan DarkRed DarkMagenta DarkYellow
     # Gray DarkGray Blue Green Cyan Red Magenta Yellow White
 
+    $previousCommand = Get-History -Count 1
+    $previousCommandDuration = $previousCommand.Duration.Milliseconds
+
     $currentDrive = (Get-Location).Drive
     $currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
 
@@ -102,7 +105,12 @@ function Prompt {
     $path = Split-Path (Get-Location) -Leaf
 
     $host.UI.RawUI.BufferSize.width = 1000
-    Write-Host ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "Gray"
+    Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "Gray"
+    if ($previousCommandDuration) {
+        Write-Host -NoNewLine "($previousCommandDuration ms)"  -foregroundColor "Gray"
+        # Write-Host "('$previousCommand' took $previousCommandDuration ms)"  -foregroundColor "Gray"
+    }
+    Write-Host
     $host.UI.RawUI.ForegroundColor = "White"
     $host.UI.RawUI.BackgroundColor = "Blue"
     $host.UI.Write(" $([char]0xFAB2)")
