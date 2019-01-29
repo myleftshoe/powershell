@@ -52,11 +52,16 @@ function Set-StartDirectory {
 }
 Set-Alias ssd Set-StartDirectory
 
+function gitStatus { git status $args}
+Set-Alias gs gitStatus
+
 ssd
+$DOCS = "D:\"
 $DEV = "X:\"
 $SCRIPTS = "$DEV\powershell"
 $env:path += ";$SCRIPTS"
 
+function docs {cd $DOCS}
 function dev {cd $DEV}
 function scripts {cd $SCRIPTS}
 function react {cd $DEV\react}
@@ -141,11 +146,9 @@ function Prompt {
 	}
 
 	# Grab Git Status
-	$git_status = ""
 	$git_stagedCount = 0
 	$git_unstagedCount = 0
 	git status --porcelain | foreach {
-		$git_status = $_ #just replace other wise it will be empty
 		if ($_.substring(0,1) -ne " ") {
 			$git_stagedCount += 1
 		}
@@ -154,10 +157,10 @@ function Prompt {
 		}
 	}
 
-    $git_remoteDiffers = $(git rev-list HEAD...origin/master --count)
-	if (!$git_remoteDiffers) {
-		$git_remoteDiffers = "-"
-	}
+    $git_remoteCommitDiffCount = $(git rev-list HEAD...origin/master --count)
+	# if (!$git_remoteCommitDiffCount) {
+	# 	$git_remoteCommitDiffCount = "-"
+	# }
 
 
 	$curtime = Get-Date
@@ -183,7 +186,7 @@ function Prompt {
 	Write-Host -NoNewLine "$([char]57528)" -foregroundColor "Blue" -backgroundColor "Gray"
 	# Write-Host -NoNewLine " $relativePath " -foregroundColor "Black" -backgroundColor "Gray"
 	# Write-Host -NoNewLine (" {0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "White" -backgroundColor "Blue"
-	Write-Host -NoNewLine " $path " -foregroundColor "Black" -backgroundColor "Gray"
+	Write-Host -NoNewLine " $path " -foregroundColor "White" -backgroundColor "Gray"
 	# Write-Host " $path " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
 	# Write-Host " $relativePath " -foregroundColor $prompt_text -backgroundColor $prompt_background -NoNewLine
 	# if ($git_unstagedCount) {
@@ -198,22 +201,25 @@ function Prompt {
 	# 	Write-Host "$git_branch " -NoNewLine -foregroundColor "Black" -backgroundColor "Green"
 	# 	Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Green"
 	# }
-	# elseif ($git_remoteDiffers -gt 0){
+	# elseif ($git_remoteCommitDiffCount -gt 0){
 	# 	Write-Host  "$([char]57528)" -NoNewLine -foregroundColor "Gray" -backgroundColor "Yellow"
 	# 	Write-Host  " $([char]0xE725) " -NoNewLine -foregroundColor "Black" -backgroundColor "Yellow"
 	# 	Write-Host "$git_branch " -NoNewLine -foregroundColor "Black" -backgroundColor "Yellow"
 	# 	Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Yellow"
 	# }
 	# else {
+	if ($is_git) {
 		Write-Host  "$([char]57528)" -NoNewLine -foregroundColor "Gray" -backgroundColor "DarkGray"
 		Write-Host  " $([char]0xE725) "  -NoNewLine -foregroundColor "Black" -backgroundColor "DarkGray"
 		Write-Host "$git_branch " -NoNewLine -foregroundColor "Black" -backgroundColor "DarkGray"
 		Write-Host "$git_stagedCount " -NoNewLine -foregroundColor "Green" -backgroundColor "DarkGray"
 		Write-Host "$git_unstagedCount " -NoNewLine -foregroundColor "Red" -backgroundColor "DarkGray"
-		Write-Host "$git_remoteDiffers " -NoNewLine -foregroundColor "Yellow" -backgroundColor "DarkGray"
+		Write-Host "$git_remoteCommitDiffCount " -NoNewLine -foregroundColor "Yellow" -backgroundColor "DarkGray"
 		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "DarkGray"
-		# Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Gray"
-	# }
+	}
+	else {
+		Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Gray"
+	}
 	# Write-Host -NoNewLine "[" -foregroundColor Yellow
 	# Write-Host -NoNewLine "]$" -foregroundColor Yellow
 	# Write-Host -NoNewLine "$" -foregroundColor Yellow
