@@ -97,12 +97,16 @@ function Prompt {
             $git_unstagedCount += 1
         }
     }
+    # $git_stagedColor = git config color.status.added
+    # $git_unstagedColor = git config color.status.changed
 
     $git_remoteCommitDiffCount = $(git rev-list HEAD...origin/master --count)
 
 
     # $drive = (PWD).Drive.Name
     $path = Split-Path (Get-Location) -Leaf
+
+    Write-Host
 
     $host.UI.RawUI.BufferSize.width = 1000
     Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "Blue"
@@ -120,13 +124,13 @@ function Prompt {
     Write-Host -NoNewLine "$([char]57528)" -foregroundColor "DarkBlue" -backgroundColor "Blue"
     Write-Host -NoNewLine " $path " -foregroundColor "White" -backgroundColor "Blue"
     if ($is_git) {
-        Write-Host  "$([char]57528)" -NoNewLine -foregroundColor "Gray" -backgroundColor "DarkGray"
-        Write-Host  " $([char]0xE725) "  -NoNewLine -foregroundColor "Black" -backgroundColor "DarkGray"
-        Write-Host "$git_branch " -NoNewLine -foregroundColor "Black" -backgroundColor "DarkGray"
-        Write-Host "$git_stagedCount " -NoNewLine -foregroundColor "Green" -backgroundColor "DarkGray"
-        Write-Host "$git_unstagedCount " -NoNewLine -foregroundColor "Red" -backgroundColor "DarkGray"
-        Write-Host "$git_remoteCommitDiffCount " -NoNewLine -foregroundColor "Yellow" -backgroundColor "DarkGray"
-        Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "DarkGray"
+        Write-Host  "$([char]57528)" -NoNewLine -foregroundColor "Blue" -backgroundColor "Gray"
+        Write-Host  " $([char]0xE725) "  -NoNewLine -foregroundColor "Black" -backgroundColor "Gray"
+        Write-Host "$git_branch " -NoNewLine -foregroundColor "Black" -backgroundColor "Gray"
+        Write-Host "$git_stagedCount " -NoNewLine -foregroundColor "DarkGreen" -backgroundColor "Gray"
+        Write-Host "$git_unstagedCount " -NoNewLine -foregroundColor "DarkRed" -backgroundColor "Gray"
+        Write-Host "$git_remoteCommitDiffCount " -NoNewLine -foregroundColor "DarkYellow" -backgroundColor "Gray"
+        Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Gray"
     }
     else {
         Write-Host  -NoNewLine "$([char]57520)$([char]57521)$([char]57521)$([char]57521)" -foregroundColor "Blue"
