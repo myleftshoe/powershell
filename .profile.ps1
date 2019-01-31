@@ -110,38 +110,7 @@ function Prompt {
     $currentDrive = (Get-Location).Drive
     $currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
 
-    $is_git = git rev-parse --is-inside-work-tree
-
-    $git_branch = "";
-    git branch | ForEach-Object {
-        if ($_ -match "^\* (.*)") {
-            $git_branch += $matches[1]
-        }
-    }
-    if (!$git_branch) {
-        $git_branch = "(none)"
-    }
-
-    # Grab Git Status
-    $git_stagedCount = 0
-    $git_unstagedCount = 0
-    git status --porcelain | ForEach-Object {
-        if ($_.substring(0, 1) -ne " ") {
-            $git_stagedCount += 1
-        }
-        if ($_.substring(1, 1) -ne " ") {
-            $git_unstagedCount += 1
-        }
-    }
-    # $git_stagedColor = git config color.status.added
-    # $git_unstagedColor = git config color.status.changed
-
     $git_remoteCommitDiffCount = $(git rev-list HEAD...origin/master --count)
-
-
-    # $drive = (PWD).Drive.Name
-    $pwdPath = Get-Location
-    $pwdLeaf = Split-Path ($pwdPath) -Leaf
 
     # Write-Host
 
@@ -151,48 +120,100 @@ function Prompt {
             Write-Host -NoNewLine "($previousCommandDuration ms)" -foregroundColor "Gray"
         }
         Write-Host
-        Write-Host
+        # Write-Host
     }
 
     # Write-Host "—" -foregroundColor "DarkGray"
+    # $drive = (PWD).Drive.Name
+    $pwdItem = (Get-Item (Get-Location))
+    $pwdPath = $pwdItem.fullname
+    $pwdParentPath = $pwdItem.parent.fullname
+    $pwdLeaf = $pwdItem.name
 
+    $folderIcon = ""
     if ("$pwdPath" -eq "$home") {
         if ("$pwdPath" -eq "$_home") {
-            Write-Host -NoNewLine " ≋ " -foregroundColor "DarkCyan"
+            $folderIcon = "≋"
         }
         else {
-            Write-Host -NoNewLine " ~ " -foregroundColor "DarkCyan"
+            $folderIcon = "~"
         }
     }
     elseif ("$pwdPath" -eq "$_home") {
-        Write-Host -NoNewLine " ≈ " -foregroundColor "DarkCyan"
-    }
-
-    if ($is_git) {
-        $gitRepoPath = $(git rev-parse --show-toplevel).replace("/", "\")
-        $gitRepoLeaf = Split-Path (git rev-parse --show-toplevel) -Leaf
-        if ("$pwdPath" -ne "$gitRepoPath") {
-            $childPath="$pwdPath".replace("$gitRepoPath", "")
-            Write-Host -NoNewLine "$childPath in $gitRepoLeaf"
-        }
-        else {
-            Write-Host -NoNewLine "$gitRepoLeaf"
-        }
-
-        # Write-Host  "$([char]57528)" -NoNewLine -foregroundColor "Blue" -backgroundColor "Gray"
-        Write-Host  " $([char]0xE725) "  -NoNewLine -foregroundColor "DarkCyan"
-        Write-Host "$git_branch " -NoNewLine -foregroundColor "Gray"
-        Write-Host $("$git_stagedCount ") -NoNewLine -foregroundColor "DarkGreen"
-        Write-Host $("$git_unstagedCount ") -NoNewLine -foregroundColor "DarkRed"
-        Write-Host $("$git_remoteCommitDiffCount") -NoNewLine -foregroundColor "DarkYellow"
-    }
-    else {
-        Write-Host -NoNewLine "$pwdPath"
+        $folderIcon = "≈"
     }
 
     Write-Host
 
-    Write-Host -NoNewLine "$([char]0xf054)$([char]0xf054)$([char]0xf054)" -foregroundColor "yellow"
+    # Line 1
+    Write-Host "┏━ $folderIcon" -NoNewLine -foregroundColor "Yellow"
+    Write-Host " $pwdLeaf" -NoNewLine -foregroundColor "Gray"
+    if ("$pwdLeaf" -ne "$pwdPath") {
+        Write-Host "  $pwdParentPath" -NoNewLine -foregroundColor "DarkGray"
+    }
+
+    Write-Host
+
+    # Line 2
+    $is_git = git rev-parse --is-inside-work-tree
+    if ($is_git) {
+
+        Write-Host "┃ " -NoNewLine -foregroundColor "Yellow"
+
+        $gitLogo = ""
+        $gitBranchIcon = ""
+
+        $git_branch = "";
+        git branch | ForEach-Object {
+            if ($_ -match "^\* (.*)") {
+                $git_branch += $matches[1]
+            }
+        }
+        if (!$git_branch) {
+            $git_branch = "(none)"
+        }
+
+        # Grab Git Status
+        $git_stagedCount = 0
+        $git_unstagedCount = 0
+        git status --porcelain | ForEach-Object {
+            if ($_.substring(0, 1) -ne " ") {
+                $git_stagedCount += 1
+            }
+            if ($_.substring(1, 1) -ne " ") {
+                $git_unstagedCount += 1
+            }
+        }
+
+        $gitRepoPath = $(git rev-parse --show-toplevel).replace("/", "\")
+        $gitRepoLeaf = Split-Path (git rev-parse --show-toplevel) -Leaf
+
+        # $gitRemoteName = $(basename (git remote get-url origin)).replace(".git", "")
+        $gitRemoteName = $(Split-Path -Leaf (git remote get-url origin)).replace(".git", "")
+
+        if ("$pwdPath" -ne "$gitRepoPath") {
+            # $childPath="$pwdPath".replace("$gitRepoPath", "")
+            Write-Host " $gitLogo "  -NoNewLine -foregroundColor "Yellow"
+            Write-Host -NoNewLine "$gitRepoLeaf"
+        }
+        # else {
+        #     Write-Host -NoNewLine "$gitRepoLeaf"
+        # }
+
+        Write-Host " $gitBranchIcon "  -NoNewLine -foregroundColor "Yellow"
+        Write-Host "$git_branch " -NoNewLine -foregroundColor "Gray"
+        Write-Host $("$git_stagedCount ") -NoNewLine -foregroundColor "Green"
+        Write-Host $("$git_unstagedCount ") -NoNewLine -foregroundColor "Red"
+        Write-Host $("$git_remoteCommitDiffCount") -NoNewLine -foregroundColor "Yellow"
+        # warn if remote name != local folder name
+        if ("$gitRemoteName" -ne "$gitRepoLeaf") {
+            Write-Host " ($gitRemoteName)" -NoNewLine -foregroundColor "Yellow"
+        }
+        Write-Host
+    }
+
+    # Line 3
+    Write-Host "┗" -NoNewLine -foregroundColor "Yellow"
 
     $windowTitle = "$((Get-Location).Path)"
     if ($windowTitle -eq $HOME) {$windowTitle = "~"}
