@@ -8,7 +8,35 @@ $env:TERM = 'cygwin'
 $env:TERM = 'FRSX'
 
 
-$global:foregroundColor = 'white'
+# $global:foregroundColor = 'White'
+$global:promptColor = 'Yellow'
+$global:dynamicPromptColor="on"
+$global:colorIndex=0;
+
+function get-NextColor( ) {
+    $colors = [Enum]::GetValues( [ConsoleColor] )
+    $max = $colors.length - 1
+
+    $global:colorIndex++
+    if ($global:colorIndex -gt $max) {
+        $global:colorIndex = 0
+    }
+    $color= $colors[$colorIndex]
+    if ("$color" -eq "$((get-host).ui.rawui.BackgroundColor)") {
+        $color = get-NextColor
+    }
+    return $color
+}
+
+function Show-Colors( ) {
+    $colors = [Enum]::GetValues( [ConsoleColor] )
+    $max = ($colors | ForEach-Object { "$_ ".Length } | Measure-Object -Maximum).Maximum
+    foreach ( $color in $colors ) {
+        Write-Host (" {0,2} {1,$max} " -f [int]$color, $color) -NoNewline
+        Write-Host "  " -Background $color
+    }
+}
+
 
 # Change color of command line parameters
 Set-PSReadLineOption -Colors @{Parameter = "Magenta"; Operator = "Magenta"; Type = "Magenta"}
@@ -41,11 +69,9 @@ $global:timer = "on"
 function Set-Timer($state) {
     if ($state -eq "on") {
         $global:timer="on"
-        # Write-Host on
     }
     if  ($state -eq "off") {
         $global:timer="off"
-        # Write-Host off
     }
 }
 
@@ -88,21 +114,15 @@ function scripts {Set-Location $SCRIPTS}
 function react {Set-Location $DEV\react}
 function sysinfo {Clear-Host; screenfetch}
 
-function Show-Colors( ) {
-    $colors = [Enum]::GetValues( [ConsoleColor] )
-    $max = ($colors | ForEach-Object { "$_ ".Length } | Measure-Object -Maximum).Maximum
-    foreach ( $color in $colors ) {
-        Write-Host (" {0,2} {1,$max} " -f [int]$color, $color) -NoNewline
-        Write-Host "$color" -Foreground $color
-    }
-}
-
-
 
 function Prompt {
     # Prompt Colors
     # Black DarkBlue DarkGreen DarkCyan DarkRed DarkMagenta DarkYellow
     # Gray DarkGray Blue Green Cyan Red Magenta Yellow White
+
+    if ("$dynamicPromptColor" -eq "on") {
+        $global:promptColor = Get-NextColor
+    }
 
     $previousCommand = Get-History -Count 1
     $previousCommandDuration = $previousCommand.Duration.Milliseconds
@@ -116,7 +136,7 @@ function Prompt {
         # Write-Host -NoNewLine "    " -foregroundColor "Yellow"
         Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "DarkGray"
         if ($previousCommandDuration) {
-            Write-Host -NoNewLine "($previousCommandDuration ms)" -foregroundColor "Gray"
+            Write-Host -NoNewLine "($previousCommandDuration ms)"
         }
         # Write-Host
         # Write-Host
@@ -145,8 +165,8 @@ function Prompt {
     Write-Host
 
     # Line 1
-    Write-Host "┏━ $folderIcon" -NoNewLine -foregroundColor "Yellow"
-    Write-Host " $pwdLeaf" -NoNewLine -foregroundColor "Gray"
+    Write-Host "┏━ $folderIcon" -NoNewLine -foregroundColor "$promptColor"
+    Write-Host " $pwdLeaf" -NoNewLine
     if ("$pwdLeaf" -ne "$pwdPath") {
         Write-Host "  $pwdParentPath" -NoNewLine -foregroundColor "DarkGray"
     }
@@ -157,7 +177,7 @@ function Prompt {
     $is_git = git rev-parse --is-inside-work-tree
     if ($is_git) {
 
-        Write-Host "┃ " -NoNewLine -foregroundColor "Yellow"
+        Write-Host "┃ " -NoNewLine -foregroundColor "$promptColor"
 
         $gitLogo = ""
         $gitBranchIcon = ""
@@ -202,19 +222,20 @@ function Prompt {
         # }
 
         Write-Host " $gitBranchIcon "  -NoNewLine -foregroundColor "Yellow"
-        Write-Host "$git_branch " -NoNewLine -foregroundColor "Gray"
+        Write-Host "$git_branch " -NoNewLine
         Write-Host $("$git_stagedCount ") -NoNewLine -foregroundColor "Green"
         Write-Host $("$git_unstagedCount ") -NoNewLine -foregroundColor "Red"
         Write-Host $("$git_remoteCommitDiffCount") -NoNewLine -foregroundColor "Yellow"
         # warn if remote name != local folder name
         if ("$gitRemoteName" -ne "$gitRepoLeaf") {
-            Write-Host " ($gitRemoteName)" -NoNewLine -foregroundColor "Yellow"
+            Write-Host " 肋" -NoNewLine -foregroundColor "Yellow"
+            Write-Host "$gitRemoteName" -NoNewLine
         }
         Write-Host
     }
 
     # Line 3
-    Write-Host "┗" -NoNewLine -foregroundColor "Yellow"
+    Write-Host "┗" -NoNewLine -foregroundColor "$promptColor"
 
     $windowTitle = "$((Get-Location).Path)"
     if ($windowTitle -eq $HOME) {$windowTitle = "~"}
