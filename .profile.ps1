@@ -113,6 +113,7 @@ function Prompt {
     # Write-Host
 
     if ("$timer" -eq "on") {
+        Write-Host -NoNewLine "    " -foregroundColor "Yellow"
         Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "DarkGray"
         if ($previousCommandDuration) {
             Write-Host -NoNewLine "($previousCommandDuration ms)" -foregroundColor "Gray"
