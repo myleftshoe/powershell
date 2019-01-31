@@ -110,8 +110,6 @@ function Prompt {
     $currentDrive = (Get-Location).Drive
     $currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
 
-    $git_remoteCommitDiffCount = $(git rev-list HEAD...origin/master --count)
-
     # Write-Host
 
     if ("$timer" -eq "on") {
@@ -184,6 +182,8 @@ function Prompt {
                 $git_unstagedCount += 1
             }
         }
+
+        $git_remoteCommitDiffCount = $(git rev-list HEAD...origin/master --count)
 
         $gitRepoPath = $(git rev-parse --show-toplevel).replace("/", "\")
         $gitRepoLeaf = Split-Path (git rev-parse --show-toplevel) -Leaf
