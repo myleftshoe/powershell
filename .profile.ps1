@@ -128,8 +128,7 @@ function Prompt {
     }
     $previousCommand = Get-History -Count 1
     if ("$($previousCommand.Id)" -ne "$savedCommandId") {
-        # $previousCommandDuration = $previousCommand.Duration.TotalMilliseconds
-        $previousCommandDuration = [Math]::Round([decimal]($previousCommand.Duration.TotalMilliseconds))
+        $previousCommandDuration = [int]$previousCommand.Duration.TotalMilliseconds
         $global:savedCommandId = $previousCommand.Id
     }
     $currentDrive = (Get-Location).Drive
