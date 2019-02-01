@@ -120,6 +120,8 @@ function Prompt {
     # Black DarkBlue DarkGreen DarkCyan DarkRed DarkMagenta DarkYellow
     # Gray DarkGray Blue Green Cyan Red Magenta Yellow White
 
+    $is_git = git rev-parse --is-inside-work-tree
+
     if ("$dynamicPromptColor" -eq "on") {
         $global:promptColor = Get-NextColor
     }
@@ -149,6 +151,8 @@ function Prompt {
     $pwdParentPath = $pwdItem.parent.fullname
     $pwdLeaf = $pwdItem.name
 
+    Write-Host
+
     $folderIcon = ""
     if ("$pwdPath" -eq "$home") {
         if ("$pwdPath" -eq "$_home") {
@@ -162,22 +166,28 @@ function Prompt {
         $folderIcon = "≈"
     }
 
-    Write-Host
-
-    # Line 1
-    Write-Host "┏━ $folderIcon" -NoNewLine -foregroundColor "$promptColor"
+    Write-Host "┏━" -foregroundColor "$promptColor" -NoNewLine
+    Write-Host " $folderIcon" -NoNewLine -foregroundColor "$promptColor"
     Write-Host " $pwdLeaf" -NoNewLine
     if ("$pwdLeaf" -ne "$pwdPath") {
         Write-Host "  $pwdParentPath" -NoNewLine -foregroundColor "DarkGray"
     }
-
     Write-Host
+    if ($is_git) {
+        Write-Host "┃ " -foregroundColor "$promptColor"
+    }
+    Write-Host "┗" -foregroundColor "$promptColor" -NoNewLine
+
+    Write-Host "$([char]0x1b)[s" -NoNewLine
+    # Write-Host "$([char]0x1b)[2A" -NoNewLine
+
+    # Line 1
+
+    Write-Host "$([char]0x1b)[u" -NoNewLine
+
 
     # Line 2
-    $is_git = git rev-parse --is-inside-work-tree
     if ($is_git) {
-
-        Write-Host "┃ " -NoNewLine -foregroundColor "$promptColor"
 
         $gitLogo = ""
         $gitBranchIcon = ""
@@ -212,14 +222,13 @@ function Prompt {
         # $gitRemoteName = $(basename (git remote get-url origin)).replace(".git", "")
         $gitRemoteName = $(Split-Path -Leaf (git remote get-url origin)).replace(".git", "")
 
+        Write-Host "$([char]0x1b)[1A" -NoNewLine
+
         if ("$pwdPath" -ne "$gitRepoPath") {
             # $childPath="$pwdPath".replace("$gitRepoPath", "")
-            Write-Host " $gitLogo "  -NoNewLine -foregroundColor "Yellow"
-            Write-Host -NoNewLine "$gitRepoLeaf"
+            Write-Host " $gitLogo " -NoNewLine -foregroundColor "Yellow"
+            Write-Host "$gitRepoLeaf" -NoNewLine
         }
-        # else {
-        #     Write-Host -NoNewLine "$gitRepoLeaf"
-        # }
 
         Write-Host " $gitBranchIcon "  -NoNewLine -foregroundColor "Yellow"
         Write-Host "$git_branch " -NoNewLine
@@ -229,13 +238,13 @@ function Prompt {
         # warn if remote name != local folder name
         if ("$gitRemoteName" -ne "$gitRepoLeaf") {
             Write-Host " 肋" -NoNewLine -foregroundColor "Yellow"
-            Write-Host "$gitRemoteName" -NoNewLine
+            Write-Host "$gitRemoteName" -NoNewLine -foregroundColor "Yellow"
         }
-        Write-Host
+        Write-Host "$([char]0x1b)[u" -NoNewLine
+        # Write-Host
     }
 
     # Line 3
-    Write-Host "┗" -NoNewLine -foregroundColor "$promptColor"
 
     $windowTitle = "$((Get-Location).Path)"
     if ($windowTitle -eq $HOME) {$windowTitle = "~"}
