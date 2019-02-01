@@ -114,6 +114,7 @@ function scripts {Set-Location $SCRIPTS}
 function react {Set-Location $DEV\react}
 function sysinfo {Clear-Host; screenfetch}
 
+$global:savedCommandId
 
 function Prompt {
     # Prompt Colors
@@ -125,10 +126,11 @@ function Prompt {
     if ("$dynamicPromptColor" -eq "on") {
         $global:promptColor = Get-NextColor
     }
-
     $previousCommand = Get-History -Count 1
-    $previousCommandDuration = $previousCommand.Duration.Milliseconds
-
+    if ("$($previousCommand.Id)" -ne "$savedCommandId") {
+        $previousCommandDuration = $previousCommand.Duration.Milliseconds
+        $global:savedCommandId = $previousCommand.Id
+    }
     $currentDrive = (Get-Location).Drive
     $currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
 
