@@ -142,7 +142,7 @@ function Prompt {
         if ($previousCommandDuration) {
             Write-Host -NoNewLine "($previousCommandDuration ms)"
         }
-        # Write-Host
+        Write-Host
         # Write-Host
     }
 
@@ -153,7 +153,7 @@ function Prompt {
     $pwdParentPath = $pwdItem.parent.fullname
     $pwdLeaf = $pwdItem.name
 
-    Write-Host
+    # Write-Host
 
     $folderIcon = ""
     if ("$pwdPath" -eq "$home") {
