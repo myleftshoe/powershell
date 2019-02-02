@@ -9,8 +9,8 @@ $env:TERM = 'FRSX'
 
 
 # $global:foregroundColor = 'White'
-$global:promptColor = 'Yellow'
-$global:dynamicPromptColor="on"
+$global:promptColor = 'DarkBlue'
+$global:dynamicPromptColor="off"
 $global:colorIndex=0;
 
 function get-NextColor( ) {
@@ -104,7 +104,7 @@ function sysinfo {Clear-Host; screenfetch}
 $global:savedCommandId
 
 
-$folderIcon = ""
+$folderIcon = ""
 $gitLogo = ""
 $gitBranchIcon = ""
 $gitRemoteIcon = "肋"
@@ -204,25 +204,38 @@ function Prompt {
             elseif ("$pwdPath" -eq "$_home") {
                 $folderIcon = "≈"
             }
-            Write-Host "▃▃▃" -foregroundColor "$promptColor"
+            [Console]::Write("$([char]0x1b)[44m")
+            Write-Host -NoNewLine "    ▕" -foregroundColor "Black" -backgroundColor "$promptColor"
+            [Console]::Write("$([char]0x1b)[400@")
+            Write-Host
+            # Write-Host "".PadRight(80," ")
             # Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
-            Write-Host " $folderIcon " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
+            Write-Host "  $folderIcon " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
+            Write-Host "▕" -NoNewLine -backgroundColor "$promptColor" -foregroundColor "Black"
             Write-Host " $pwdLeaf" -NoNewLine
             if ("$pwdLeaf" -ne "$pwdPath") {
                 Write-Host " in $pwdParentPath" -NoNewLine -foregroundColor "DarkGray"
             }
+            [Console]::Write("$([char]0x1b)[400@")
+            # [Console]::Write("$([char]0x1b)[2A")
+            # [Console]::Write("$([char]0x1b)[6L")
         # }
+        # Write-Host "." -foregroundColor "$promptColor" -NoNewLine
+        # [Console]::Write("$([char]0x1b)[400@")
 
         if ($is_git) {
             Write-Host
             # Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
             if ("$pwdPath" -ne "$gitRepoPath") {
                 # $childPath="$pwdPath".replace("$gitRepoPath", "")
-                Write-Host " $gitLogo " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
+                Write-Host "  $gitLogo " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
+                Write-Host "▕" -NoNewLine -backgroundColor "$promptColor" -foregroundColor "Black"
                 Write-Host " $gitRepoLeaf " -NoNewLine
+                [Console]::Write("$([char]0x1b)[400@")
+                Write-Host
             }
-
-            Write-Host " $gitBranchIcon " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
+            Write-Host "  $gitBranchIcon " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
+            Write-Host "▕" -NoNewLine -backgroundColor "$promptColor" -foregroundColor "Black"
             Write-Host " $gitBranch " -NoNewLine
             if ($gitCommitCount -eq 0) {
                 Write-Host "(no commits) " -NoNewLine -foregroundColor "DarkGray"
@@ -235,9 +248,13 @@ function Prompt {
                 Write-Host " $gitRemoteIcon" -NoNewLine -foregroundColor "Yellow"
                 Write-Host "$gitRemoteName" -NoNewLine -foregroundColor "Yellow"
             }
-        }
+            [Console]::Write("$([char]0x1b)[400@")
+            Write-Host
+            Write-Host "    ▕" -foregroundColor "Black" -backgroundColor "$promptColor" -NoNewLine
+            [Console]::Write("$([char]0x1b)[400@")
+            }
+        [Console]::Write("$([char]0x1b)[0m")
         Write-Host
-        Write-Host "▀▀▀" -foregroundColor "$promptColor"
     }
 
 
@@ -249,8 +266,8 @@ function Prompt {
     $promptState.gitStagedCount = $gitStagedCount
     $promptState.gitUnstagedCount = $gitUnstagedCount
     $promptState.gitRemoteCommitDiffCount = $gitRemoteCommitDiffCount
-
-    Write-Host "" -NoNewLine -foregroundColor "$promptColor"
+    Write-Host
+    Write-Host "  " -NoNewLine -foregroundColor "$promptColor"
 
     $windowTitle = "$((Get-Location).Path)"
     if ($windowTitle -eq $HOME) {$windowTitle = "~"}
