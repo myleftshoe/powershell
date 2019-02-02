@@ -46,24 +46,11 @@ Set-PSReadLineOption -Colors @{Parameter = "Magenta"; Operator = "Magenta"; Type
 # Install-Module PSColor
 Import-Module PSColor
 
-function toSuperscript($text) {
-    $hash = @{}
-    $hash.0 = "$([char]0x2070)"
-    $hash.1 = "$([char]0x00B9)"
-    $hash.2 = "$([char]0x00B2)"
-    $hash.3 = "$([char]0x00B3)"
-    $hash.4 = "$([char]0x2074)"
-    $hash.5 = "$([char]0x2075)"
-    $hash.6 = "$([char]0x2076)"
-    $hash.7 = "$([char]0x2077)"
-    $hash.8 = "$([char]0x2078)"
-    $hash.9 = "$([char]0x2079)"
-
-    Foreach ($key in $hash.Keys) {
-        $text = $text.Replace($key, $hash.$key)
-    }
-    return $text
-}
+$promptState = @{}
+$promptState.pwd = ""
+$promptState.gitStagedCount = ""
+$promptState.gitUnstagedCount = ""
+$promptState.gitRemoteCommitDiffCount = ""
 
 $global:timer = "on"
 function Set-Timer($state) {
@@ -116,16 +103,60 @@ function sysinfo {Clear-Host; screenfetch}
 
 $global:savedCommandId
 
+
+$folderIcon = ""
+$gitLogo = ""
+$gitBranchIcon = ""
+$gitRemoteIcon = "肋"
+
 function Prompt {
+
     # Prompt Colors
     # Black DarkBlue DarkGreen DarkCyan DarkRed DarkMagenta DarkYellow
     # Gray DarkGray Blue Green Cyan Red Magenta Yellow White
 
-    $is_git = git rev-parse --is-inside-work-tree
-
-    if ("$dynamicPromptColor" -eq "on") {
-        $global:promptColor = Get-NextColor
+    function stateChanged {
+        return (($promptState.pwd -ne $pwdPath) -or `
+            ($gitRepoPath -ne $promptState.gitRepoPath) -or `
+            ($gitStagedCount -ne $promptState.gitStagedCount) -or `
+            ($gitUnstagedCount -ne $promptState.gitUnstagedCount) -or `
+            ($gitRemoteCommitDiffCount -ne $promptState.gitRemoteCommitDiffCount)
+        )
     }
+
+    $is_git = git rev-parse --is-inside-work-tree
+    if ($is_git) {
+
+        $gitBranch = "(none)";
+        $gitBranch = $(git symbolic-ref --short HEAD)
+
+        $gitCommitCount = 0;
+        $gitCommitCount=$(git rev-list --all --count)
+
+        $gitStagedCount = 0
+        $gitUnstagedCount = 0
+        git status --porcelain | ForEach-Object {
+            if ($_.substring(0, 1) -ne " ") {
+                $gitStagedCount += 1
+            }
+            if ($_.substring(1, 1) -ne " ") {
+                $gitUnstagedCount += 1
+            }
+        }
+
+        $gitRemoteCommitDiffCount = $(git rev-list HEAD...origin/master --count)
+
+        $gitRepoPath = $(git rev-parse --show-toplevel).replace("/", "\")
+        $gitRepoLeaf = Split-Path (git rev-parse --show-toplevel) -Leaf
+
+        # $gitRemoteName = $(basename (git remote get-url origin)).replace(".git", "")
+        $gitRemoteName = ""
+        Try {
+            $gitRemoteName = $(Split-Path -Leaf (git remote get-url origin)).replace(".git", "")
+        }
+        Catch {}
+    }
+
     $previousCommand = Get-History -Count 1
     if ("$($previousCommand.Id)" -ne "$savedCommandId") {
         $previousCommandDuration = [int]$previousCommand.Duration.TotalMilliseconds
@@ -137,13 +168,14 @@ function Prompt {
     # Write-Host
 
     if ("$timer" -eq "on") {
+        Write-Host
         # Write-Host -NoNewLine "    " -foregroundColor "Yellow"
         Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "DarkGray"
         if ($previousCommandDuration) {
             Write-Host -NoNewLine "($previousCommandDuration ms)"
         }
         Write-Host
-        # Write-Host
+        Write-Host
     }
 
     # Write-Host "—" -foregroundColor "DarkGray"
@@ -153,101 +185,73 @@ function Prompt {
     $pwdParentPath = $pwdItem.parent.fullname
     $pwdLeaf = $pwdItem.name
 
+
+    if (stateChanged) {
+
+        if ("$dynamicPromptColor" -eq "on") {
+            $global:promptColor = Get-NextColor
+        }
+
+        if ($promptState.pwd -ne $pwdPath) {
+            if ("$pwdPath" -eq "$home") {
+                if ("$pwdPath" -eq "$_home") {
+                    $folderIcon = "≋"
+                }
+                else {
+                    $folderIcon = "~"
+                }
+            }
+            elseif ("$pwdPath" -eq "$_home") {
+                $folderIcon = "≈"
+            }
+            Write-Host "▃" -foregroundColor "$promptColor"
+            Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
+            Write-Host " $folderIcon" -NoNewLine -foregroundColor "$promptColor"
+            Write-Host " $pwdLeaf" -NoNewLine
+            if ("$pwdLeaf" -ne "$pwdPath") {
+                Write-Host " ($pwdParentPath)" -NoNewLine -foregroundColor "DarkGray"
+            }
+        }
+
+        if ($is_git) {
+            Write-Host
+            Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
+            if ("$pwdPath" -ne "$gitRepoPath") {
+                # $childPath="$pwdPath".replace("$gitRepoPath", "")
+                Write-Host " $gitLogo " -NoNewLine -foregroundColor "Yellow"
+                Write-Host "$gitRepoLeaf" -NoNewLine
+            }
+
+            Write-Host " $gitBranchIcon "  -NoNewLine -foregroundColor "Yellow"
+            Write-Host "$gitBranch " -NoNewLine
+            if ($gitCommitCount -eq 0) {
+                Write-Host "(no commits) " -NoNewLine -foregroundColor "DarkGray"
+            }
+            Write-Host $("$gitStagedCount ") -NoNewLine -foregroundColor "Green"
+            Write-Host $("$gitUnstagedCount ") -NoNewLine -foregroundColor "Red"
+            Write-Host $("$gitRemoteCommitDiffCount") -NoNewLine -foregroundColor "Yellow"
+            # warn if remote name != local folder name
+            if ("$gitRemoteName" -and ("$gitRemoteName" -ne "$gitRepoLeaf")) {
+                Write-Host " $gitRemoteIcon" -NoNewLine -foregroundColor "Yellow"
+                Write-Host "$gitRemoteName" -NoNewLine -foregroundColor "Yellow"
+            }
+        }
+        Write-Host
+        Write-Host "▀" -foregroundColor "$promptColor" -NoNewLine
+    }
+
+
+    # Write-Host "$([char]0x1b)[u" -NoNewLine
     # Write-Host
 
-    $folderIcon = ""
-    if ("$pwdPath" -eq "$home") {
-        if ("$pwdPath" -eq "$_home") {
-            $folderIcon = "≋"
-        }
-        else {
-            $folderIcon = "~"
-        }
-    }
-    elseif ("$pwdPath" -eq "$_home") {
-        $folderIcon = "≈"
-    }
+    $promptState.pwd = "$pwdPath"
+    $promptState.gitRepoPath = $gitRepoPath
+    $promptState.gitStagedCount = $gitStagedCount
+    $promptState.gitUnstagedCount = $gitUnstagedCount
+    $promptState.gitRemoteCommitDiffCount = $gitRemoteCommitDiffCount
 
-    Write-Host "┏━" -foregroundColor "$promptColor" -NoNewLine
-    Write-Host " $folderIcon" -NoNewLine -foregroundColor "$promptColor"
-    Write-Host " $pwdLeaf" -NoNewLine
-    if ("$pwdLeaf" -ne "$pwdPath") {
-        Write-Host " ($pwdParentPath)" -NoNewLine -foregroundColor "DarkGray"
-    }
     Write-Host
-    if ($is_git) {
-        Write-Host "┃ " -foregroundColor "$promptColor"
-    }
-    Write-Host "┗" -foregroundColor "$promptColor" -NoNewLine
-
-    Write-Host "$([char]0x1b)[s" -NoNewLine
-    # Write-Host "$([char]0x1b)[2A" -NoNewLine
-
-    # Line 1
-
-    Write-Host "$([char]0x1b)[u" -NoNewLine
-
-
-    # Line 2
-    if ($is_git) {
-
-        $gitLogo = ""
-        $gitBranchIcon = ""
-
-        $git_branch = "(none)";
-        $git_branch = $(git symbolic-ref --short HEAD)
-
-        $git_commitCount = 0;
-        $git_commitCount=$(git rev-list --all --count)
-
-        $git_stagedCount = 0
-        $git_unstagedCount = 0
-        git status --porcelain | ForEach-Object {
-            if ($_.substring(0, 1) -ne " ") {
-                $git_stagedCount += 1
-            }
-            if ($_.substring(1, 1) -ne " ") {
-                $git_unstagedCount += 1
-            }
-        }
-
-        $git_remoteCommitDiffCount = $(git rev-list HEAD...origin/master --count)
-
-        $gitRepoPath = $(git rev-parse --show-toplevel).replace("/", "\")
-        $gitRepoLeaf = Split-Path (git rev-parse --show-toplevel) -Leaf
-
-        # $gitRemoteName = $(basename (git remote get-url origin)).replace(".git", "")
-        $gitRemoteName = ""
-        Try {
-            $gitRemoteName = $(Split-Path -Leaf (git remote get-url origin)).replace(".git", "")
-        }
-        Catch {}
-
-        Write-Host "$([char]0x1b)[1A" -NoNewLine
-
-        if ("$pwdPath" -ne "$gitRepoPath") {
-            # $childPath="$pwdPath".replace("$gitRepoPath", "")
-            Write-Host " $gitLogo " -NoNewLine -foregroundColor "Yellow"
-            Write-Host "$gitRepoLeaf" -NoNewLine
-        }
-
-        Write-Host " $gitBranchIcon "  -NoNewLine -foregroundColor "Yellow"
-        Write-Host "$git_branch " -NoNewLine
-        if ($git_commitCount -eq 0) {
-            Write-Host "(no commits) " -NoNewLine -foregroundColor "DarkGray"
-        }
-        Write-Host $("$git_stagedCount ") -NoNewLine -foregroundColor "Green"
-        Write-Host $("$git_unstagedCount ") -NoNewLine -foregroundColor "Red"
-        Write-Host $("$git_remoteCommitDiffCount") -NoNewLine -foregroundColor "Yellow"
-        # warn if remote name != local folder name
-        if ("$gitRemoteName" -and ("$gitRemoteName" -ne "$gitRepoLeaf")) {
-            Write-Host " 肋" -NoNewLine -foregroundColor "Yellow"
-            Write-Host "$gitRemoteName" -NoNewLine -foregroundColor "Yellow"
-        }
-
-        Write-Host "$([char]0x1b)[u" -NoNewLine
-        # Write-Host
-    }
+    Write-Host "" -NoNewLine -foregroundColor "$promptColor"
 
     $windowTitle = "$((Get-Location).Path)"
     if ($windowTitle -eq $HOME) {$windowTitle = "~"}
