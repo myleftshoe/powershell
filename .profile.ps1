@@ -192,7 +192,7 @@ function Prompt {
             $global:promptColor = Get-NextColor
         }
 
-        if ($promptState.pwd -ne $pwdPath) {
+        # if ($promptState.pwd -ne $pwdPath) {
             if ("$pwdPath" -eq "$home") {
                 if ("$pwdPath" -eq "$_home") {
                     $folderIcon = "≋"
@@ -211,7 +211,7 @@ function Prompt {
             if ("$pwdLeaf" -ne "$pwdPath") {
                 Write-Host " ($pwdParentPath)" -NoNewLine -foregroundColor "DarkGray"
             }
-        }
+        # }
 
         if ($is_git) {
             Write-Host
