@@ -172,7 +172,7 @@ function Prompt {
     Write-Host " $folderIcon" -NoNewLine -foregroundColor "$promptColor"
     Write-Host " $pwdLeaf" -NoNewLine
     if ("$pwdLeaf" -ne "$pwdPath") {
-        Write-Host "  $pwdParentPath" -NoNewLine -foregroundColor "DarkGray"
+        Write-Host " ($pwdParentPath)" -NoNewLine -foregroundColor "DarkGray"
     }
     Write-Host
     if ($is_git) {
@@ -194,17 +194,12 @@ function Prompt {
         $gitLogo = ""
         $gitBranchIcon = ""
 
-        $git_branch = "";
-        git branch | ForEach-Object {
-            if ($_ -match "^\* (.*)") {
-                $git_branch += $matches[1]
-            }
-        }
-        if (!$git_branch) {
-            $git_branch = "(none)"
-        }
+        $git_branch = "(none)";
+        $git_branch = $(git symbolic-ref --short HEAD)
 
-        # Grab Git Status
+        $git_commitCount = 0;
+        $git_commitCount=$(git rev-list --all --count)
+
         $git_stagedCount = 0
         $git_unstagedCount = 0
         git status --porcelain | ForEach-Object {
@@ -222,7 +217,11 @@ function Prompt {
         $gitRepoLeaf = Split-Path (git rev-parse --show-toplevel) -Leaf
 
         # $gitRemoteName = $(basename (git remote get-url origin)).replace(".git", "")
-        $gitRemoteName = $(Split-Path -Leaf (git remote get-url origin)).replace(".git", "")
+        $gitRemoteName = ""
+        Try {
+            $gitRemoteName = $(Split-Path -Leaf (git remote get-url origin)).replace(".git", "")
+        }
+        Catch {}
 
         Write-Host "$([char]0x1b)[1A" -NoNewLine
 
@@ -234,19 +233,21 @@ function Prompt {
 
         Write-Host " $gitBranchIcon "  -NoNewLine -foregroundColor "Yellow"
         Write-Host "$git_branch " -NoNewLine
+        if ($git_commitCount -eq 0) {
+            Write-Host "(no commits) " -NoNewLine -foregroundColor "DarkGray"
+        }
         Write-Host $("$git_stagedCount ") -NoNewLine -foregroundColor "Green"
         Write-Host $("$git_unstagedCount ") -NoNewLine -foregroundColor "Red"
         Write-Host $("$git_remoteCommitDiffCount") -NoNewLine -foregroundColor "Yellow"
         # warn if remote name != local folder name
-        if ("$gitRemoteName" -ne "$gitRepoLeaf") {
+        if ("$gitRemoteName" -and ("$gitRemoteName" -ne "$gitRepoLeaf")) {
             Write-Host " 肋" -NoNewLine -foregroundColor "Yellow"
             Write-Host "$gitRemoteName" -NoNewLine -foregroundColor "Yellow"
         }
+
         Write-Host "$([char]0x1b)[u" -NoNewLine
         # Write-Host
     }
-
-    # Line 3
 
     $windowTitle = "$((Get-Location).Path)"
     if ($windowTitle -eq $HOME) {$windowTitle = "~"}
