@@ -204,26 +204,26 @@ function Prompt {
             elseif ("$pwdPath" -eq "$_home") {
                 $folderIcon = "≈"
             }
-            Write-Host "▃" -foregroundColor "$promptColor"
-            Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
-            Write-Host " $folderIcon" -NoNewLine -foregroundColor "$promptColor"
+            Write-Host "▃▃▃" -foregroundColor "$promptColor"
+            # Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
+            Write-Host " $folderIcon " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
             Write-Host " $pwdLeaf" -NoNewLine
             if ("$pwdLeaf" -ne "$pwdPath") {
-                Write-Host " ($pwdParentPath)" -NoNewLine -foregroundColor "DarkGray"
+                Write-Host " in $pwdParentPath" -NoNewLine -foregroundColor "DarkGray"
             }
         # }
 
         if ($is_git) {
             Write-Host
-            Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
+            # Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
             if ("$pwdPath" -ne "$gitRepoPath") {
                 # $childPath="$pwdPath".replace("$gitRepoPath", "")
-                Write-Host " $gitLogo " -NoNewLine -foregroundColor "Yellow"
-                Write-Host "$gitRepoLeaf" -NoNewLine
+                Write-Host " $gitLogo " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
+                Write-Host " $gitRepoLeaf " -NoNewLine
             }
 
-            Write-Host " $gitBranchIcon "  -NoNewLine -foregroundColor "Yellow"
-            Write-Host "$gitBranch " -NoNewLine
+            Write-Host " $gitBranchIcon " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
+            Write-Host " $gitBranch " -NoNewLine
             if ($gitCommitCount -eq 0) {
                 Write-Host "(no commits) " -NoNewLine -foregroundColor "DarkGray"
             }
@@ -237,7 +237,7 @@ function Prompt {
             }
         }
         Write-Host
-        Write-Host "▀" -foregroundColor "$promptColor" -NoNewLine
+        Write-Host "▀▀▀" -foregroundColor "$promptColor"
     }
 
 
@@ -250,7 +250,6 @@ function Prompt {
     $promptState.gitUnstagedCount = $gitUnstagedCount
     $promptState.gitRemoteCommitDiffCount = $gitRemoteCommitDiffCount
 
-    Write-Host
     Write-Host "" -NoNewLine -foregroundColor "$promptColor"
 
     $windowTitle = "$((Get-Location).Path)"
