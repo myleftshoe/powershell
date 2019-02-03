@@ -243,8 +243,8 @@ function Prompt {
     }
 
 
-    $currentDrive = (Get-Location).Drive
-    $currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
+    # $currentDrive = (Get-Location).Drive
+    # $currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
 
 
     $is_git = git rev-parse --is-inside-work-tree
