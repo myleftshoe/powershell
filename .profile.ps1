@@ -9,24 +9,56 @@ $env:TERM = 'FRSX'
 
 
 # $global:foregroundColor = 'White'
-$global:promptColor = 'DarkBlue'
-$global:dynamicPromptColor="off"
+$global:primary = "Blue"
+$global:tint = "DarkBlue"
+$global:dynamicPromptColor="on"
 $global:colorIndex=0;
 
 function get-NextColor( ) {
-    $colors = [Enum]::GetValues( [ConsoleColor] )
-    $max = $colors.length - 1
 
     $global:colorIndex++
-    if ($global:colorIndex -gt $max) {
+    if ($global:colorIndex -gt ($palette.length - 1)) {
         $global:colorIndex = 0
     }
-    $color= $colors[$colorIndex]
+    $color= $palette[$colorIndex]
     if ("$color" -eq "$((get-host).ui.rawui.BackgroundColor)") {
         $color = get-NextColor
     }
     return $color
 }
+
+# function get-NextColor( ) {
+#     # $colors = $fg.getenumerator() | Sort-Object -Property Key
+#     # $colors[2]
+#     $colors = $fg.Keys | % ToString
+#     # $colors.length
+#     $max = $colors.length - 1
+
+#     $global:colorIndex++
+#     if ($global:colorIndex -gt $max) {
+#         $global:colorIndex = 0
+#     }
+#     $color= $colors[$colorIndex]
+#     if ("$color" -eq "$((get-host).ui.rawui.BackgroundColor)") {
+#         $color = get-NextColor
+#     }
+#     return $color
+# }
+
+# function get-NextColor( ) {
+#     $colors = [Enum]::GetValues( [ConsoleColor] )
+#     $max = $colors.length - 1
+
+#     $global:colorIndex++
+#     if ($global:colorIndex -gt $max) {
+#         $global:colorIndex = 0
+#     }
+#     $color= $colors[$colorIndex]
+#     if ("$color" -eq "$((get-host).ui.rawui.BackgroundColor)") {
+#         $color = get-NextColor
+#     }
+#     return $color
+# }
 
 function Show-Colors( ) {
     $colors = [Enum]::GetValues( [ConsoleColor] )
@@ -109,11 +141,63 @@ $gitLogo = ""
 $gitBranchIcon = ""
 $gitRemoteIcon = "肋"
 
-function Prompt {
+# Prompt Colors
+# Black DarkBlue DarkGreen DarkCyan DarkRed DarkMagenta DarkYellow
+# Gray DarkGray Blue Green Cyan Red Magenta Yellow White
 
-    # Prompt Colors
-    # Black DarkBlue DarkGreen DarkCyan DarkRed DarkMagenta DarkYellow
-    # Gray DarkGray Blue Green Cyan Red Magenta Yellow White
+$esc="$([char]0x1b)"
+# Control character sequences
+$fg = [ordered]@{
+    "Black"         = "$esc[30m";
+    "DarkBlue"      = "$esc[34m";
+    "DarkGreen"     = "$esc[32m";
+    "DarkCyan"      = "$esc[36m";
+    "DarkRed"       = "$esc[31m";
+    "DarkMagenta"   = "$esc[35m";
+    "DarkYellow"    = "$esc[33m";
+    "Gray"          = "$esc[37m";
+    # "Extended"      = "$esc[38m";
+    # "Default"       = "$esc[39m";
+    "DarkGray"      = "$esc[90m";
+    "Blue"          = "$esc[94m";
+    "Green"         = "$esc[92m";
+    "Cyan"          = "$esc[96m";
+    "Red"           = "$esc[91m";
+    "Magenta"       = "$esc[95m";
+    "Yellow"        = "$esc[93m";
+    "White"         = "$esc[97m";
+}
+$bg = [ordered]@{
+    "Black"         = "$esc[40m";
+    "DarkBlue"      = "$esc[44m";
+    "DarkGreen"     = "$esc[42m";
+    "DarkCyan"      = "$esc[46m";
+    "DarkRed"       = "$esc[41m";
+    "DarkMagenta"   = "$esc[45m";
+    "DarkYellow"    = "$esc[43m";
+    "Gray"          = "$esc[47m";
+    # "Extended"      = "$esc[38m";
+    # "Default"       = "$esc[39m";
+    "DarkGray"      = "$esc[100m";
+    "Blue"          = "$esc[104m";
+    "Green"         = "$esc[102m";
+    "Cyan"          = "$esc[106m";
+    "Red"           = "$esc[101m";
+    "Magenta"       = "$esc[105m";
+    "Yellow"        = "$esc[103m";
+    "White"         = "$esc[107m";
+}
+
+$palette = @("Blue", "Green", "Cyan", "Red", "Magenta", "Yellow", "Gray")
+
+function WriteLinePadded ($text) {
+    [Console]::Write($text)
+    [Console]::Write(" $([char]0x1b)[400@")
+    [Console]::WriteLine("$([char]0x1b)[0m")
+}
+
+
+function Prompt {
 
     function stateChanged {
         return (($promptState.pwd -ne $pwdPath) -or `
@@ -123,6 +207,45 @@ function Prompt {
             ($gitRemoteCommitDiffCount -ne $promptState.gitRemoteCommitDiffCount)
         )
     }
+
+    function saveState {
+        $promptState.pwd = "$pwdPath"
+        $promptState.gitRepoPath = $gitRepoPath
+        $promptState.gitStagedCount = $gitStagedCount
+        $promptState.gitUnstagedCount = $gitUnstagedCount
+        $promptState.gitRemoteCommitDiffCount = $gitRemoteCommitDiffCount
+    }
+
+    function setWindowTitle {
+        $windowTitle = "$((Get-Location).Path)"
+        if ($windowTitle -eq $HOME) {$windowTitle = "~"}
+        $host.UI.RawUI.WindowTitle = "$windowTitle"
+    }
+
+    $previousCommand = Get-History -Count 1
+    if ("$($previousCommand.Id)" -ne "$savedCommandId") {
+        $previousCommandDuration = [int]$previousCommand.Duration.TotalMilliseconds
+        $global:savedCommandId = $previousCommand.Id
+    }
+
+    if ("$timer" -eq "on") {
+        Write-Host
+        # Write-Host -NoNewLine "    " -foregroundColor "Yellow"
+        Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "DarkGray"
+        if ($previousCommandDuration) {
+            Write-Host -NoNewLine "($previousCommandDuration ms)"
+        }
+        Write-Host
+        Write-Host
+    }
+    else {
+        Write-Host
+    }
+
+
+    $currentDrive = (Get-Location).Drive
+    $currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
+
 
     $is_git = git rev-parse --is-inside-work-tree
     if ($is_git) {
@@ -157,27 +280,6 @@ function Prompt {
         Catch {}
     }
 
-    $previousCommand = Get-History -Count 1
-    if ("$($previousCommand.Id)" -ne "$savedCommandId") {
-        $previousCommandDuration = [int]$previousCommand.Duration.TotalMilliseconds
-        $global:savedCommandId = $previousCommand.Id
-    }
-    $currentDrive = (Get-Location).Drive
-    $currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
-
-    # Write-Host
-
-    if ("$timer" -eq "on") {
-        Write-Host
-        # Write-Host -NoNewLine "    " -foregroundColor "Yellow"
-        Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "DarkGray"
-        if ($previousCommandDuration) {
-            Write-Host -NoNewLine "($previousCommandDuration ms)"
-        }
-        Write-Host
-        Write-Host
-    }
-
     # Write-Host "—" -foregroundColor "DarkGray"
     # $drive = (PWD).Drive.Name
     $pwdItem = (Get-Item (Get-Location))
@@ -189,90 +291,71 @@ function Prompt {
     if (stateChanged) {
 
         if ("$dynamicPromptColor" -eq "on") {
-            $global:promptColor = Get-NextColor
+            $global:primary = Get-NextColor
+            $global:tint = "Dark$($primary)"
         }
 
-        # if ($promptState.pwd -ne $pwdPath) {
-            if ("$pwdPath" -eq "$home") {
-                if ("$pwdPath" -eq "$_home") {
-                    $folderIcon = "≋"
-                }
-                else {
-                    $folderIcon = "~"
-                }
+        if ("$pwdPath" -eq "$home") {
+            if ("$pwdPath" -eq "$_home") {
+                $folderIcon = "≋"
             }
-            elseif ("$pwdPath" -eq "$_home") {
-                $folderIcon = "≈"
+            else {
+                $folderIcon = "~"
             }
-            [Console]::Write("$([char]0x1b)[44m")
-            Write-Host -NoNewLine "    ▕" -foregroundColor "Black" -backgroundColor "$promptColor"
-            [Console]::Write("$([char]0x1b)[400@")
-            Write-Host
-            # Write-Host "".PadRight(80," ")
-            # Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
-            Write-Host "  $folderIcon " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
-            Write-Host "▕" -NoNewLine -backgroundColor "$promptColor" -foregroundColor "Black"
-            Write-Host " $pwdLeaf" -NoNewLine
-            if ("$pwdLeaf" -ne "$pwdPath") {
-                Write-Host " in $pwdParentPath" -NoNewLine -foregroundColor "DarkGray"
-            }
-            [Console]::Write("$([char]0x1b)[400@")
-            # [Console]::Write("$([char]0x1b)[2A")
-            # [Console]::Write("$([char]0x1b)[6L")
-        # }
-        # Write-Host "." -foregroundColor "$promptColor" -NoNewLine
-        # [Console]::Write("$([char]0x1b)[400@")
+        }
+        elseif ("$pwdPath" -eq "$_home") {
+            $folderIcon = "≈"
+        }
+        # [Console]::Write("$([char]0x1b)[44m")
+        # Write-Host -NoNewLine "    ▕" -foregroundColor "Black" -backgroundColor "$primary"
+
+        # [Console]::Write($bg.Red)
+        $Icon = $bg.$primary +  "     "
+        $Text = $bg.$tint
+        WriteLinePadded ($Icon + $Text)
+
+        $Icon = $bg.$primary + $fg.White + "  $folderIcon  "
+        $Text = $bg.$tint  + $fg.White + "  $pwdLeaf"
+        if ("$pwdLeaf" -ne "$pwdPath") {
+            $Text = $Text + $fg.Black + " in $pwdParentPath"
+        }
+        WriteLinePadded ($Icon + $Text)
 
         if ($is_git) {
-            Write-Host
-            # Write-Host "█" -foregroundColor "$promptColor" -NoNewLine
+            # Write-Host
+            # Write-Host "█" -foregroundColor "$primary" -NoNewLine
             if ("$pwdPath" -ne "$gitRepoPath") {
-                # $childPath="$pwdPath".replace("$gitRepoPath", "")
-                Write-Host "  $gitLogo " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
-                Write-Host "▕" -NoNewLine -backgroundColor "$promptColor" -foregroundColor "Black"
-                Write-Host " $gitRepoLeaf " -NoNewLine
-                [Console]::Write("$([char]0x1b)[400@")
-                Write-Host
+                $Icon = $bg.$primary + $fg.White +  "  $gitLogo  "
+                $Text = $bg.$tint + $fg.White + "  $gitRepoLeaf"
+                WriteLinePadded ($Icon + $Text)
             }
-            Write-Host "  $gitBranchIcon " -NoNewLine -backgroundColor "$promptColor" -foregroundColor "White"
-            Write-Host "▕" -NoNewLine -backgroundColor "$promptColor" -foregroundColor "Black"
-            Write-Host " $gitBranch " -NoNewLine
+            $Icon = $bg.$primary + $fg.White +  "  $gitBranchIcon  "
+            $Text = $bg.$tint + $fg.White + "  $gitBranch"
             if ($gitCommitCount -eq 0) {
-                Write-Host "(no commits) " -NoNewLine -foregroundColor "DarkGray"
+                $Text = $Text + $fg.DarkGray + " (no commits)"
             }
-            Write-Host $("$gitStagedCount ") -NoNewLine -foregroundColor "Green"
-            Write-Host $("$gitUnstagedCount ") -NoNewLine -foregroundColor "Red"
-            Write-Host $("$gitRemoteCommitDiffCount") -NoNewLine -foregroundColor "Yellow"
+            $Text = $Text + $fg.Green + " $gitStagedCount"
+            $Text = $Text + $fg.Red + " $gitUnstagedCount"
+            $Text = $Text + $fg.Yellow + " $gitRemoteCommitDiffCount"
+            WriteLinePadded ($Icon + $Text)
             # warn if remote name != local folder name
             if ("$gitRemoteName" -and ("$gitRemoteName" -ne "$gitRepoLeaf")) {
-                Write-Host " $gitRemoteIcon" -NoNewLine -foregroundColor "Yellow"
-                Write-Host "$gitRemoteName" -NoNewLine -foregroundColor "Yellow"
+                $Icon = $bg.$primary + $fg.White +  "  $gitRemoteIcon "
+                $Text = $bg.$tint + $fg.White + "  $gitRemoteName"
+                WriteLinePadded ($Icon + $Text)
             }
-            [Console]::Write("$([char]0x1b)[400@")
-            Write-Host
-            Write-Host "    ▕" -foregroundColor "Black" -backgroundColor "$promptColor" -NoNewLine
-            [Console]::Write("$([char]0x1b)[400@")
-            }
-        [Console]::Write("$([char]0x1b)[0m")
-        Write-Host
+        }
+        $Icon = $bg.$primary +  "     "
+        $Text = $bg.$tint
+        WriteLinePadded ($Icon + $Text)
+        [Console]::WriteLine()
     }
 
+    [Console]::Write(($fg.$primary + " "))
 
-    # Write-Host "$([char]0x1b)[u" -NoNewLine
-    # Write-Host
+    saveState
+    setWindowTitle
 
-    $promptState.pwd = "$pwdPath"
-    $promptState.gitRepoPath = $gitRepoPath
-    $promptState.gitStagedCount = $gitStagedCount
-    $promptState.gitUnstagedCount = $gitUnstagedCount
-    $promptState.gitRemoteCommitDiffCount = $gitRemoteCommitDiffCount
-    Write-Host
-    Write-Host "  " -NoNewLine -foregroundColor "$promptColor"
-
-    $windowTitle = "$((Get-Location).Path)"
-    if ($windowTitle -eq $HOME) {$windowTitle = "~"}
-    $host.UI.RawUI.WindowTitle = "$windowTitle"
-
-    Return " "
+    Return "  "
 
 }
