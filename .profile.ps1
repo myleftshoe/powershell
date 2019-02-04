@@ -7,12 +7,16 @@ chcp 65001 > $null
 $env:TERM = 'cygwin'
 $env:TERM = 'FRSX'
 
-
+$global:_showprompt=""
 # $global:foregroundColor = 'White'
 $global:primary = "Blue"
 $global:tint = "DarkBlue"
 $global:dynamicPromptColor="on"
 $global:colorIndex=0;
+
+function showprompt() {
+    $global:_showprompt="on"
+}
 
 function get-NextColor( ) {
 
@@ -170,7 +174,8 @@ function WriteLinePadded ($text) {
 function Prompt {
 
     function stateChanged {
-        return (($promptState.pwd -ne $pwdPath) -or `
+        return ($_showprompt) -or
+            (($promptState.pwd -ne $pwdPath) -or `
             ($gitRepoPath -ne $promptState.gitRepoPath) -or `
             ($gitStagedCount -ne $promptState.gitStagedCount) -or `
             ($gitUnstagedCount -ne $promptState.gitUnstagedCount) -or `
@@ -320,9 +325,9 @@ function Prompt {
 
             switch ($tint)
             {
-               "Green" {$green=$fg.DarkGreen}
-               "Red" {$red=$fg.DarkRed}
-               "Yellow" {$yellow=$fg.DarkYellow}
+                "Green" {$green=$fg.DarkGreen}
+                "Red" {$red=$fg.DarkRed}
+                "Yellow" {$yellow=$fg.DarkYellow}
             }
 
             $Text = $Text + $green + " $gitStagedCount"
@@ -346,6 +351,7 @@ function Prompt {
 
     saveState
     setWindowTitle
+    $global:_showprompt=""
 
     Return "  "
 
