@@ -27,39 +27,6 @@ function get-NextColor( ) {
     return $color
 }
 
-# function get-NextColor( ) {
-#     # $colors = $fg.getenumerator() | Sort-Object -Property Key
-#     # $colors[2]
-#     $colors = $fg.Keys | % ToString
-#     # $colors.length
-#     $max = $colors.length - 1
-
-#     $global:colorIndex++
-#     if ($global:colorIndex -gt $max) {
-#         $global:colorIndex = 0
-#     }
-#     $color= $colors[$colorIndex]
-#     if ("$color" -eq "$((get-host).ui.rawui.BackgroundColor)") {
-#         $color = get-NextColor
-#     }
-#     return $color
-# }
-
-# function get-NextColor( ) {
-#     $colors = [Enum]::GetValues( [ConsoleColor] )
-#     $max = $colors.length - 1
-
-#     $global:colorIndex++
-#     if ($global:colorIndex -gt $max) {
-#         $global:colorIndex = 0
-#     }
-#     $color= $colors[$colorIndex]
-#     if ("$color" -eq "$((get-host).ui.rawui.BackgroundColor)") {
-#         $color = get-NextColor
-#     }
-#     return $color
-# }
-
 function Show-Colors( ) {
     $colors = [Enum]::GetValues( [ConsoleColor] )
     $max = ($colors | ForEach-Object { "$_ ".Length } | Measure-Object -Maximum).Maximum
@@ -190,7 +157,8 @@ $bg = [ordered]@{
     "White"         = "$esc[107m";
 }
 
-$palette = @("Blue", "Green", "Cyan", "Red", "Magenta", "Yellow", "Gray")
+# $palette = @("Blue", "Green",  "Cyan", "Red", "Magenta", "Yellow", "Gray")
+$palette = @("DarkBlue", "DarkGreen",  "DarkCyan", "DarkRed", "DarkMagenta", "DarkYellow", "DarkGray")
 
 function WriteLinePadded ($text) {
     [Console]::Write($text)
@@ -294,7 +262,17 @@ function Prompt {
 
         if ("$dynamicPromptColor" -eq "on") {
             $global:primary = Get-NextColor
-            $global:tint = "Dark$($primary)"
+            $global:tintTextColor=$primary
+            if ($primary.startsWith("Dark")) {
+                $global:primaryTextColor="White"
+                $global:secondaryTextColor="Black"
+                $global:tint = $primary.replace("Dark", "")
+            }
+            else {
+                $global:primaryTextColor="Black"
+                $global:secondaryTextColor="White"
+                $global:tint = "Dark$($primary)"
+            }
         }
 
         if ("$pwdPath" -eq "$home") {
@@ -316,10 +294,10 @@ function Prompt {
         $Text = $bg.$tint
         WriteLinePadded ($Icon + $Text)
 
-        $Icon = $bg.$primary + $fg.White + "  $folderIcon  "
-        $Text = $bg.$tint  + $fg.White + "  $pwdLeaf"
+        $Icon = $bg.$primary + $fg.$primaryTextColor + "  $folderIcon  "
+        $Text = $bg.$tint  + $fg.$secondaryTextColor + "  $pwdLeaf"
         if ("$pwdLeaf" -ne "$pwdPath") {
-            $Text = $Text + $fg.Black + " in $pwdParentPath"
+            $Text = $Text + $fg.$tintTextColor + " in $pwdParentPath"
         }
         WriteLinePadded ($Icon + $Text)
 
@@ -327,23 +305,34 @@ function Prompt {
             # Write-Host
             # Write-Host "█" -foregroundColor "$primary" -NoNewLine
             if ("$pwdPath" -ne "$gitRepoPath") {
-                $Icon = $bg.$primary + $fg.White +  "  $gitLogo  "
-                $Text = $bg.$tint + $fg.White + "  $gitRepoLeaf"
+                $Icon = $bg.$primary + $fg.$primaryTextColor +  "  $gitLogo  "
+                $Text = $bg.$tint + $fg.$secondaryTextColor + "  $gitRepoLeaf"
                 WriteLinePadded ($Icon + $Text)
             }
-            $Icon = $bg.$primary + $fg.White +  "  $gitBranchIcon  "
-            $Text = $bg.$tint + $fg.White + "  $gitBranch"
+            $Icon = $bg.$primary + $fg.$primaryTextColor +  "  $gitBranchIcon  "
+            $Text = $bg.$tint + $fg.$secondaryTextColor + "  $gitBranch"
             if ($gitCommitCount -eq 0) {
-                $Text = $Text + $fg.DarkGray + " (no commits)"
+                $Text = $Text + $fg.$tintTextColor + " (no commits)"
             }
-            $Text = $Text + $fg.Green + " $gitStagedCount"
-            $Text = $Text + $fg.Red + " $gitUnstagedCount"
-            $Text = $Text + $fg.Yellow + " $gitRemoteCommitDiffCount"
+            $green=$fg.Green
+            $red=$fg.Red
+            $yellow=$fg.Yellow
+
+            switch ($tint)
+            {
+               "Green" {$green=$fg.DarkGreen}
+               "Red" {$red=$fg.DarkRed}
+               "Yellow" {$yellow=$fg.DarkYellow}
+            }
+
+            $Text = $Text + $green + " $gitStagedCount"
+            $Text = $Text + $red + " $gitUnstagedCount"
+            $Text = $Text + $yellow + " $gitRemoteCommitDiffCount"
             WriteLinePadded ($Icon + $Text)
             # warn if remote name != local folder name
             if ("$gitRemoteName" -and ("$gitRemoteName" -ne "$gitRepoLeaf")) {
-                $Icon = $bg.$primary + $fg.White +  "  $gitRemoteIcon "
-                $Text = $bg.$tint + $fg.White + "  $gitRemoteName"
+                $Icon = $bg.$primary + $fg.$primaryTextColor +  "  $gitRemoteIcon "
+                $Text = $bg.$tint + $fg.$secondaryTextColor + "  $gitRemoteName"
                 WriteLinePadded ($Icon + $Text)
             }
         }
