@@ -17,6 +17,7 @@ $global:colorIndex=0;
 function showprompt() {
     $global:_showprompt="on"
 }
+Set-Alias sfp showprompt
 
 function get-NextColor( ) {
 
