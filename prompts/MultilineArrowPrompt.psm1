@@ -20,16 +20,6 @@ function get-NextColor( ) {
     return $color
 }
 
-$script:timer = "on"
-function Set-Timer($state) {
-    if ($state -eq "on") {
-        $script:timer="on"
-    }
-    if  ($state -eq "off") {
-        $script:timer="off"
-    }
-}
-
 
 function MultilineArrowPrompt {
     # Prompt Colors
@@ -41,25 +31,12 @@ function MultilineArrowPrompt {
     if ("$dynamicPromptColor" -eq "on") {
         $script:promptColor = Get-NextColor
     }
-    $previousCommand = Get-History -Count 1
-    if ("$($previousCommand.Id)" -ne "$savedCommandId") {
-        $previousCommandDuration = [int]$previousCommand.Duration.TotalMilliseconds
-        $script:savedCommandId = $previousCommand.Id
-    }
+
     $currentDrive = (Get-Location).Drive
     $currentDriveLabel = (Get-Volume $currentDrive.Name).FileSystemLabel
 
     # Write-Host
 
-    if ("$timer" -eq "on") {
-        # Write-Host -NoNewLine "    " -foregroundColor "Yellow"
-        Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "DarkGray"
-        if ($previousCommandDuration) {
-            Write-Host -NoNewLine "($previousCommandDuration ms)"
-        }
-        Write-Host
-        # Write-Host
-    }
 
     # Write-Host "—" -foregroundColor "DarkGray"
     # $drive = (PWD).Drive.Name

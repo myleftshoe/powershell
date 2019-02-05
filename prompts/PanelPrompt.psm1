@@ -39,16 +39,6 @@ $promptState.gitStagedCount = ""
 $promptState.gitUnstagedCount = ""
 $promptState.gitRemoteCommitDiffCount = ""
 
-$script:timer = "on"
-function Set-Timer($state) {
-    if ($state -eq "on") {
-        $script:timer="on"
-    }
-    if  ($state -eq "off") {
-        $script:timer="off"
-    }
-}
-$script:savedCommandId
 
 $folderIcon = ""
 $gitLogo = ""
@@ -136,26 +126,6 @@ function PanelPrompt {
         $windowTitle = "$((Get-Location).Path)"
         if ($windowTitle -eq $HOME) {$windowTitle = "~"}
         $host.UI.RawUI.WindowTitle = "$windowTitle"
-    }
-
-    $previousCommand = Get-History -Count 1
-    if ("$($previousCommand.Id)" -ne "$savedCommandId") {
-        $previousCommandDuration = [int]$previousCommand.Duration.TotalMilliseconds
-        $script:savedCommandId = $previousCommand.Id
-    }
-
-    if ("$timer" -eq "on") {
-        Write-Host
-        # Write-Host -NoNewLine "    " -foregroundColor "Yellow"
-        Write-Host -NoNewline ("{0:HH}:{0:mm}:{0:ss} " -f (Get-Date)) -foregroundColor "DarkGray"
-        if ($previousCommandDuration) {
-            Write-Host -NoNewLine "($previousCommandDuration ms)"
-        }
-        Write-Host
-        Write-Host
-    }
-    else {
-        Write-Host
     }
 
 

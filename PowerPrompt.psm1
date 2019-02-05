@@ -74,9 +74,12 @@ function PowerPrompt {
         [environment]::SetEnvironmentVariable("PowerPromptName", "$defaultPrompt", "User")
     }
 
+    ShowTimer
+    Write-Host
     & $env:PowerPromptName
 
     return "  "
 }
 
 Export-ModuleMember -Function PowerPrompt
+Export-ModuleMember -Function PowerPromptTimer
