@@ -1,21 +1,21 @@
 #Author: psammut
 
-$global:_showprompt=""
-# $global:foregroundColor = 'White'
-$global:primary = "Blue"
-$global:tint = "DarkBlue"
-$global:dynamicPromptColor="on"
-$global:colorIndex=0;
+$script:_showprompt=""
+# $script:foregroundColor = 'White'
+$script:primary = "Blue"
+$script:tint = "DarkBlue"
+$script:dynamicPromptColor="on"
+$script:colorIndex=0;
 
 function showprompt() {
-    $global:_showprompt="on"
+    $script:_showprompt="on"
 }
 
 function get-NextColor( ) {
 
-    $global:colorIndex++
-    if ($global:colorIndex -gt ($palette.length - 1)) {
-        $global:colorIndex = 0
+    $script:colorIndex++
+    if ($script:colorIndex -gt ($palette.length - 1)) {
+        $script:colorIndex = 0
     }
     $color= $palette[$colorIndex]
     if ("$color" -eq "$((get-host).ui.rawui.BackgroundColor)") {
@@ -39,16 +39,16 @@ $promptState.gitStagedCount = ""
 $promptState.gitUnstagedCount = ""
 $promptState.gitRemoteCommitDiffCount = ""
 
-$global:timer = "on"
+$script:timer = "on"
 function Set-Timer($state) {
     if ($state -eq "on") {
-        $global:timer="on"
+        $script:timer="on"
     }
     if  ($state -eq "off") {
-        $global:timer="off"
+        $script:timer="off"
     }
 }
-$global:savedCommandId
+$script:savedCommandId
 
 $folderIcon = ""
 $gitLogo = ""
@@ -141,7 +141,7 @@ function Prompt {
     $previousCommand = Get-History -Count 1
     if ("$($previousCommand.Id)" -ne "$savedCommandId") {
         $previousCommandDuration = [int]$previousCommand.Duration.TotalMilliseconds
-        $global:savedCommandId = $previousCommand.Id
+        $script:savedCommandId = $previousCommand.Id
     }
 
     if ("$timer" -eq "on") {
@@ -207,17 +207,17 @@ function Prompt {
     if (stateChanged) {
 
         if ("$dynamicPromptColor" -eq "on") {
-            $global:primary = Get-NextColor
-            $global:tintTextColor=$primary
+            $script:primary = Get-NextColor
+            $script:tintTextColor=$primary
             if ($primary.startsWith("Dark")) {
-                $global:primaryTextColor="White"
-                $global:secondaryTextColor="Black"
-                $global:tint = $primary.replace("Dark", "")
+                $script:primaryTextColor="White"
+                $script:secondaryTextColor="Black"
+                $script:tint = $primary.replace("Dark", "")
             }
             else {
-                $global:primaryTextColor="Black"
-                $global:secondaryTextColor="White"
-                $global:tint = "Dark$($primary)"
+                $script:primaryTextColor="Black"
+                $script:secondaryTextColor="White"
+                $script:tint = "Dark$($primary)"
             }
         }
 
@@ -292,7 +292,7 @@ function Prompt {
 
     saveState
     setWindowTitle
-    $global:_showprompt=""
+    $script:_showprompt=""
 
     Return "  "
 
