@@ -112,7 +112,7 @@ function WriteLinePadded ($text) {
 }
 
 
-function Prompt {
+function PanelPrompt {
 
     function stateChanged {
         return ($_showprompt) -or
