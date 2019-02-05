@@ -4,14 +4,30 @@
 #     [Environment]::SetEnvironmentVariable("PowerPromptName", "PanelPrompt", "User")
 # }
 $script:defaultPrompt="PanelPrompt"
+$script:disabled=0
 
 
 function PowerPrompt {
 
     Param(
         [string]$name,
-        [switch]$persist
+        [switch]$persist,
+        [switch]$disable,
+        [switch]$enable
     )
+
+    # Any error causes the standard powershell prompt to display
+    if ($disable) {
+        $script:disabled=1
+        Return
+    }
+    if ($enable) {
+        $script:disabled=0
+        Return
+    }
+    if ($disabled) {
+        Return
+    }
 
     if ($name) {
         $Env:PowerPromptName=$name
