@@ -1,5 +1,22 @@
 #Author: psammut
 
+function relativePathToHome{
+	$currentPath = (Get-Location).Path
+	$currentDrive = (Get-Location).Drive.Root
+	$homeDrive = ($_home).Drive.Root
+	if ($currentPath -eq $currentDrive -or $currentDrive -ne $homeDrive) {
+		$trimmedRelativePath = $currentPath
+	}
+	else {
+		Set-Location $_home
+		$relativePath = Resolve-Path -relative $currentPath
+		$trimmedRelativePath = $relativePath -replace '^..\\'
+	}
+	Set-Location $currentPath
+	# Write-Host $relativePath
+	# Write-Host $trimmedRelativePath
+	return $trimmedRelativePath
+}
 
 function PowerlineStylePrompt {
 	# Prompt Colors
