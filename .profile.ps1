@@ -45,14 +45,22 @@ Set-Alias get~~ Get-StartDirectory
 function gitStatus { git status $args}
 Set-Alias gs gitStatus
 
-$DOCS = "D:\"
-$DEV = "X:\"
-$PHOME = "$DEV\powershell"
+Set-Alias dev X:
+Set-Alias docs D:
+# Set-Alias \ root
+# Set-Alias / root
+# Set-Alias \- root
+# Set-Alias /- root
+
+# $DOCS = "D:\"
+# $DEV = "X:\"
+$PHOME = "dev\powershell"
 $SCRIPTS = "$PHOME"
 $env:path += ";$SCRIPTS"
 
-function docs {Set-Location $DOCS}
-function dev {Set-Location $DEV}
+# function docs {Set-Location $DOCS}
+# function root {Set-Location \}
+# function dev {Set-Location $DEV}
 function ph {Set-Location $PHOME}
 function scripts {Set-Location $SCRIPTS}
 function react {Set-Location $DEV\react}
