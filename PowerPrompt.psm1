@@ -1,12 +1,44 @@
-#Author: psammut
-# if (-not (Test-Path env:PowerPromptName)) {
-#     $env:PowerPromptName = "PanelPrompt"
-#     [Environment]::SetEnvironmentVariable("PowerPromptName", "PanelPrompt", "User")
-# }
 $script:defaultPrompt="PanelPrompt"
 $script:disabled=0
+<#
+ .Synopsis
+  Pimp your PowerShell prompt!
 
+ .Parameter name
 
+  Set the prompt to the style specifed by name
+
+ .Parameter persist
+
+  Persist the prompt across sessions. Setting the name parameter without this will
+  only change the prompt for the duration of the session.
+
+ .Parameter disable
+
+  Disable PowerPrompt, i.e. use the standard PS> prompt. Lasts for the duration
+  of the session only. (Comment out the prompt function in your powershell profile
+  to disable it permanently.)
+
+ .Parameter enable
+
+  Re-enable PowerPrompt if you have disabled it using -disable.
+
+ .Example
+  PowerPrompt MultilineArrowPrompt
+  (Changes the prompt to another style)
+
+ .Example
+  PowerPrompt PowerlineStyle -persist
+  (Changes the prompt and persists it across sessions)
+
+ .Example
+  PowerPrompt -disable
+  (Temporarily disables PowerPrompt)
+
+.Example
+  PowerPrompt -enable
+ (Re-enables it)
+#>
 function PowerPrompt {
 
     param(
