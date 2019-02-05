@@ -4,6 +4,7 @@
     RootModule = 'PowerPrompt.psm1'
     NestedModules = @(
       '.\prompts\PanelPrompt.psm1'
+      '.\prompts\MultilineArrowPrompt.psm1'
     )
     FunctionsToExport = @('*')
-  }
+}
