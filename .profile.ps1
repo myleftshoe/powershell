@@ -69,5 +69,5 @@ function sysinfo {Clear-Host; screenfetch}
 # . powerprompt.ps1
 Import-Module PowerPrompt
 function Prompt() {
-    PowerPrompt MultilineArrowPrompt
+    PowerPrompt PowerlineStylePrompt
 }
