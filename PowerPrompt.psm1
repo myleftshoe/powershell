@@ -9,7 +9,7 @@ $script:disabled=0
 
 function PowerPrompt {
 
-    Param(
+    param(
         [string]$name,
         [switch]$persist,
         [switch]$disable,
@@ -19,32 +19,32 @@ function PowerPrompt {
     # Any error causes the standard powershell prompt to display
     if ($disable) {
         $script:disabled=1
-        Return
+        return
     }
     if ($enable) {
         $script:disabled=0
-        Return
+        return
     }
     if ($disabled) {
-        Return
+        return
     }
 
     if ($name) {
-        $Env:PowerPromptName=$name
+        $env:PowerPromptName=$name
         if ($persist) {
-            [Environment]::SetEnvironmentVariable("PowerPromptName", "$name", "User")
+            [environment]::SetEnvironmentVariable("PowerPromptName", "$name", "User")
         }
-        Return
+        return
     }
 
     if (-not (Test-Path env:PowerPromptName)) {
         $env:PowerPromptName = "$defaultPrompt"
-        [Environment]::SetEnvironmentVariable("PowerPromptName", "$defaultPrompt", "User")
+        [environment]::SetEnvironmentVariable("PowerPromptName", "$defaultPrompt", "User")
     }
 
-    & $Env:PowerPromptName
+    & $env:PowerPromptName
 
-    Return "  "
+    return "  "
 }
 
 Export-ModuleMember -Function PowerPrompt
