@@ -58,4 +58,8 @@ function scripts {Set-Location $SCRIPTS}
 function react {Set-Location $DEV\react}
 function sysinfo {Clear-Host; screenfetch}
 
-. powerprompt.ps1
+# . powerprompt.ps1
+Import-Module PowerPrompt
+function Prompt() {
+    PowerPrompt
+}
