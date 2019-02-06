@@ -47,13 +47,13 @@ Set-Alias gs gitStatus
 
 $DOCS = "D:\"
 $DEV = "X:\"
-$PHOME = "$DEV\powershell"
-$SCRIPTS = "$PHOME"
+$SCRIPTS = "$DEV\powershell"
 $env:path += ";$SCRIPTS"
 
 function docs {Set-Location $DOCS}
 function dev {Set-Location $DEV}
-function ph {Set-Location $PHOME}
+function rel {Set-Location $DEV\releases}
+function ph {Set-Location $DEV\powershell}
 function scripts {Set-Location $SCRIPTS}
 function react {Set-Location $DEV\react}
 function sysinfo {Clear-Host; screenfetch}
