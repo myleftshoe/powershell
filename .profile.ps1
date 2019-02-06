@@ -4,10 +4,8 @@
 chcp 65001 > $null
 
 #Force coloring of git and npm commands
-$env:TERM = 'cygwin'
-$env:TERM = 'FRSX'
-
-Set-Alias sfp showprompt
+# $env:TERM = 'cygwin'
+# $env:TERM = 'FRSX'
 
 # Change color of command line parameters
 Set-PSReadLineOption -Colors @{Parameter = "Magenta"; Operator = "Magenta"; Type = "Magenta"}
@@ -17,14 +15,9 @@ Set-PSReadLineOption -Colors @{Parameter = "Magenta"; Operator = "Magenta"; Type
 # Install-Module PSColor
 Import-Module PSColor
 
-# Create home alias to folder in which shell was started
-function goHome {Set-Location $_home}
-Set-Alias ~~ goHome
-Set-Alias go~~ goHome
-
-function goUserHome {Set-Location ~}
-Set-Alias ~ goUserHome
-Set-Alias home goUserHome
+# folder in which shell was started
+function ~~ {Set-Location $_home}
+function ~ {Set-Location ~}
 
 function Set-StartDirectory {
     $global:_home = Get-Location
@@ -58,8 +51,11 @@ function scripts {Set-Location $SCRIPTS}
 function react {Set-Location $DEV\react}
 function sysinfo {Clear-Host; screenfetch}
 
-# . powerprompt.ps1
 Import-Module PowerPrompt
 function Prompt() {
     PowerPrompt
 }
+
+function pp { PowerPrompt -show }
+function ton { PowerPromptTimer -on }
+function toff { PowerPromptTimer -off }
