@@ -16,13 +16,13 @@ Set-PSReadLineOption -Colors @{Parameter = "Magenta"; Operator = "Magenta"; Type
 Import-Module PSColor
 
 # folder in which shell was started
-function ~~ {Set-Location $_home}
+function ~~ {Set-Location $START}
 function ~ {Set-Location ~}
 
 function Set-StartDirectory {
-    $global:_home = Get-Location
+    $global:START = Get-Location
     Write-Host
-    Write-Host "Start folder set to $_home"
+    Write-Host "Start folder set to $START"
     Write-Host
 }
 Set-Alias set~~ Set-StartDirectory
@@ -31,18 +31,20 @@ set~~
 
 function Get-StartDirectory {
     Write-Host
-    Write-Host $_home
+    Write-Host $START
 }
 Set-Alias get~~ Get-StartDirectory
 
 function gitStatus { git status $args}
 Set-Alias gs gitStatus
 
-$DOCS = "D:\"
+$DATA = "D:\"
+$DOCS = "$DATA\Documents"
 $DEV = "X:\"
 $SCRIPTS = "$DEV\powershell"
 $env:path += ";$SCRIPTS"
 
+function modules {Set-Location $DOCS\PowerShell\Modules}
 function docs {Set-Location $DOCS}
 function dev {Set-Location $DEV}
 function rel {Set-Location $DEV\releases}
