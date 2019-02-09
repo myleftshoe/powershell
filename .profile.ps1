@@ -41,14 +41,14 @@ Set-Alias gs gitStatus
 $DATA = "D:\"
 $DOCS = "$DATA\Documents"
 $DEV = "X:\"
-$SCRIPTS = "$DEV\powershell"
+$SCRIPTS = "$DEV\$\powershell"
 $env:path += ";$SCRIPTS"
 
 function modules {Set-Location $DOCS\PowerShell\Modules}
 function docs {Set-Location $DOCS}
 function dev {Set-Location $DEV}
 function rel {Set-Location $DEV\releases}
-function ph {Set-Location $DEV\powershell}
+function ph {Set-Location $SCRIPTS}
 function scripts {Set-Location $SCRIPTS}
 function react {Set-Location $DEV\react}
 function sysinfo {Clear-Host; screenfetch}
@@ -62,9 +62,10 @@ function pp { PowerPrompt -show }
 function ton { PowerPromptTimer -on }
 function toff { PowerPromptTimer -off }
 
+function $ { cd $DEV\$ }
 
-$GO="$DEV\.go"
-$GOLNK="$DEV\.golnk"
+$GO="$DEV\$\go"
+$GOLNK="$DEV\$\golnk"
 
 function new-junction {
     $target= (Get-Item (Get-Location))
@@ -75,10 +76,11 @@ function new-junction {
     $msg="Created $path"
     try {
         New-Item -ItemType Junction -Path $path -Value $target -ErrorAction stop
-        createShortcut "$lnk.lnk" "$target"
+        # createShortcut "$lnk.lnk" "$target"
     } catch {
         $msg="$path already exists!"
     }
+    createShortcut "$lnk.lnk" "$target"
     write-host
     write-host $msg
     return $path
@@ -121,7 +123,7 @@ function createShortcut($ShortcutPath, $TargetPath) {
 
 
     $Shell = New-Object -ComObject ("WScript.Shell")
-    write-host $TargetPath
+    # write-host $TargetPath
     $Shortcut = $Shell.CreateShortcut("$ShortcutPath")
     $Shortcut.TargetPath = "$TargetPath"
     $Shortcut.Save()
