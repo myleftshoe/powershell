@@ -44,11 +44,14 @@ $DEV = "X:\"
 $SCRIPTS = "$DEV\$\powershell"
 $env:path += ";$SCRIPTS"
 
+function \ { cd \ }
+function / { cd \ }
 function modules {Set-Location $DOCS\PowerShell\Modules}
 function docs {Set-Location $DOCS}
 function dev {Set-Location $DEV}
 function rel {Set-Location $DEV\releases}
-function ph {Set-Location $SCRIPTS}
+function pow {Set-Location $SCRIPTS}
+function pwr {Set-Location $SCRIPTS}
 function scripts {Set-Location $SCRIPTS}
 function react {Set-Location $DEV\react}
 function sysinfo {Clear-Host; screenfetch}
@@ -111,6 +114,12 @@ function go {
     # cd $GO
     write-host
     (Get-ChildItem -path $GO).Name
+}
+
+function gogo {
+    cd $GO
+    write-host
+    (Get-ChildItem).Name
 }
 
 function createShortcut($ShortcutPath, $TargetPath) {
