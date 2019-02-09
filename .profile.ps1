@@ -75,15 +75,21 @@ function new-junction {
     # SymbolicLink seems to require admin priveleges whereas Juncrtion does not???
     # New-Item -ItemType SymbolicLink -Path $QUICKACCESS -name $target.name -Value $target
     $path="$GO\$($target.name)".replace("\\", "\")
-    $lnk="$GOLNK\$($target.name)".replace("\\", "\")
-    $msg="Created $path"
+    $lnk="$GOLNK\$($target.name)".replace("\\", "\") + ".lnk"
+    write-host
     try {
         New-Item -ItemType Junction -Path $path -Value $target -ErrorAction stop
-        # createShortcut "$lnk.lnk" "$target"
+        write-host "Created $path"
+
     } catch {
-        $msg="$path already exists!"
+        write-host "$path already exists!"
     }
-    createShortcut "$lnk.lnk" "$target"
+    try {
+        createShortcut "$lnk" "$target"
+        write-host "Created shortcut $lnk"
+    } catch {
+        write-host "Failed to create $lnk"
+    }
     write-host
     write-host $msg
     return $path
