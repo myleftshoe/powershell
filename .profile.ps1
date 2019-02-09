@@ -108,10 +108,9 @@ function go {
         return
     }
     # Not adding or target not found:
-    cd $GO
-    ls
-    # write-host
-    # (Get-ChildItem).Name
+    # cd $GO
+    write-host
+    (Get-ChildItem -path $GO).Name
 }
 
 function createShortcut($ShortcutPath, $TargetPath) {
