@@ -68,14 +68,12 @@ function toff { PowerPromptTimer -off }
 function $ { cd $DEV\$ }
 
 $GO="$DEV\$\go"
-# $GOLNK="$DEV\$\golnk"
 
 function new-junction {
     $target= (Get-Item (Get-Location))
     # SymbolicLink seems to require admin priveleges whereas Juncrtion does not???
     # New-Item -ItemType SymbolicLink -Path $QUICKACCESS -name $target.name -Value $target
     $path="$GO\$($target.name)".replace("\\", "\")
-    # $lnk="$GOLNK\$($target.name)".replace("\\", "\") + ".lnk"
     write-host
     try {
         New-Item -ItemType Junction -Path $path -Value $target -ErrorAction stop
@@ -84,12 +82,6 @@ function new-junction {
     } catch {
         write-host "[GO] $path already exists!"
     }
-    # try {
-    #     createShortcut "$lnk" "$target"
-    #     write-host "[GO] Created shortcut $lnk"
-    # } catch {
-    #     write-host "[GO] Failed to create $lnk"
-    # }
     write-host
     write-host $msg
     return $path
@@ -100,9 +92,6 @@ function go {
     if (-not (Test-Path "$GO")) {
         mkdir "$GO"
     }
-    # if (-not (Test-Path "$GOLNK")) {
-    #     mkdir "$GOLNK"
-    # }
     if ($param -eq "+") {
         $newJunction = new-junction
         return
@@ -117,7 +106,6 @@ function go {
         return
     }
     # Not adding or target not found:
-    # cd $GO
     write-host
     (Get-ChildItem -path $GO).Name
 }
@@ -128,6 +116,7 @@ function gogo {
     (Get-ChildItem).Name
 }
 
+# Not used
 function createShortcut($ShortcutPath, $TargetPath) {
 
     # [parameter(Mandatory, Position = 0)]
