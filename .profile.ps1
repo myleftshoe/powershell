@@ -79,16 +79,16 @@ function new-junction {
     write-host
     try {
         New-Item -ItemType Junction -Path $path -Value $target -ErrorAction stop
-        write-host "Created $path"
+        write-host "[GO] Created $path"
 
     } catch {
-        write-host "$path already exists!"
+        write-host "[GO] $path already exists!"
     }
     try {
         createShortcut "$lnk" "$target"
-        write-host "Created shortcut $lnk"
+        write-host "[GO] Created shortcut $lnk"
     } catch {
-        write-host "Failed to create $lnk"
+        write-host "[GO] Failed to create $lnk"
     }
     write-host
     write-host $msg
