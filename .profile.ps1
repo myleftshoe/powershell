@@ -132,8 +132,8 @@ function go {
 
 function gogo {
     cd $GO
-    write-host
-    (Get-ChildItem).Name
+    # write-host
+    # (Get-ChildItem).Name
 }
 
 # Not used
