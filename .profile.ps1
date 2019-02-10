@@ -96,18 +96,38 @@ function go {
         $newJunction = new-junction
         return
     }
+    $names=@((Get-ChildItem -path $GO).Name)
     $junctionPath=Get-Location
-    if ($param) {
-        $junctionPath= "$GO\$param"
+    try {
+        if ($param) {
+            $junctionPath= "$GO\$param"
+            try {
+                $index=[int]$param
+                $junctionPath= "$GO\$($names[[int]$param-1])"
+            }
+            catch {}
+        }
+        $target = (Get-Item $junctionPath).target[0] 2>$null
+        if ($target) {
+            cd "$target"
+            return
+        }
     }
-    $target = (Get-Item $junctionPath).target[0]
-    if ($target) {
-        cd "$target"
-        return
-    }
+    catch {}
     # Not adding or target not found:
     write-host
-    (Get-ChildItem -path $GO).Name
+
+    $Info=@()
+    for($i = 0; $i -lt $names.count; $i++) {
+        $objInfo = New-Object PSObject -Property @{
+            'id' = $i + 1
+            'name' = $names[$i]
+        }
+        $Info += $objInfo
+    }
+
+    $Info | select id, name | format-table -HideTableHeaders
+
 }
 
 function gogo {
