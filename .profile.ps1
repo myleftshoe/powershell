@@ -128,6 +128,18 @@ function go {
 
     $Info | select id, name | format-table -HideTableHeaders
 
+    $id = read-host -prompt 'go '
+
+    try {
+        $index=[int]$id
+        if (($index -gt 0) -and ($index -le $names.count)) {
+            $junctionPath= "$GO\$($names[[int]$index-1])"
+            $target = (Get-Item $junctionPath).target[0] 2>$null
+            if ($target) { cd $target }
+        }
+    }
+    catch {}
+
 }
 
 function gogo {
